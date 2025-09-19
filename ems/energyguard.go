@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/Enedis-OSS/tic4eebus/config"
+	"github.com/Enedis-OSS/tic4eebus/ems/data"
 	"github.com/Enedis-OSS/tic4eebus/evse"
 	"github.com/Enedis-OSS/tic4eebus/linkymeter"
 	"github.com/enbility/eebus-go/api"
@@ -46,14 +47,14 @@ var (
 	OPEV_USE_CASE_SCENARIO = []model.UseCaseScenarioSupportType{1, 2, 3}
 )
 
-type OnEnergyGuardData func(data EnergyGuardDataModel)
+type OnEnergyGuardData func(data data.DataModel)
 
 type EnergyGuardDataSubscriber struct {
 	onData OnEnergyGuardData
 }
 
 type EnergyGuard struct {
-	data                       *EnergyGuardData
+	data                       *data.DataSynchronizer
 	config                     config.Config
 	subscriberAccess           sync.Mutex
 	subscriberMap              map[string]EnergyGuardDataSubscriber
@@ -77,7 +78,7 @@ func NewEnergyGuard(
 
 	energyGuard.config = config
 
-	energyGuard.data = NewEnergyGuardData(energyGuard.config.DataModel)
+	energyGuard.data = data.NewDataSynchronizer(energyGuard.config.DataModel)
 
 	energyGuard.createTIC2WebsocketClient()
 
@@ -585,7 +586,7 @@ func (e *EnergyGuard) createDiagnosis(localEntity spineapi.EntityLocalInterface)
 		log.Fatal(error)
 	}
 	e.diagnosis = diagnosis
-	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeNormalOperation, model.LastErrorCodeType(DIAGNOSIS_NO_ERROR))
+	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeNormalOperation, model.LastErrorCodeType(data.DIAGNOSIS_NO_ERROR))
 }
 
 func (e *EnergyGuard) updateDiagnosis(operatingState model.DeviceDiagnosisOperatingStateType, lastErrorCode model.LastErrorCodeType) (hasChanged bool) {
@@ -747,7 +748,7 @@ func (e *EnergyGuard) onTICError(ticError linkymeter.TICError) {
 func (e *EnergyGuard) onTICSuccess(meterData linkymeter.MeterData) (hasChanged bool) {
 	hasChanged = e.data.SetMeter(meterData)
 	if hasChanged && e.data.IsConnected() && e.data.HasOPEV() {
-		hasChanged = e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeNormalOperation, model.LastErrorCodeType(DIAGNOSIS_NO_ERROR))
+		hasChanged = e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeNormalOperation, model.LastErrorCodeType(data.DIAGNOSIS_NO_ERROR))
 	}
 	return hasChanged
 }
@@ -975,7 +976,7 @@ func (e *EnergyGuard) onReceiveUsecasesInfos(msg spineapi.ResponseMessage) {
 func (e *EnergyGuard) onUsecaseSuccess() {
 	e.data.SetHasOPEV(true)
 	if e.data.HasMeter() && e.data.IsConnected() {
-		e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeNormalOperation, model.LastErrorCodeType(DIAGNOSIS_NO_ERROR))
+		e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeNormalOperation, model.LastErrorCodeType(data.DIAGNOSIS_NO_ERROR))
 	}
 }
 
@@ -1058,7 +1059,7 @@ func (e *EnergyGuard) onVehicleLoadControlLimitsWritten(result model.ResultDataT
 
 func (e *EnergyGuard) onVehicleLoadControlLimitsSuccess() {
 	if e.data.HasMeter() && e.data.IsConnected() {
-		e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeNormalOperation, DIAGNOSIS_NO_ERROR)
+		e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeNormalOperation, data.DIAGNOSIS_NO_ERROR)
 	}
 }
 

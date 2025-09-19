@@ -17,6 +17,7 @@ require (
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
+	github.com/influxdata/influxdb-client-go/v2 v2.14.0
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/sirupsen/logrus v1.9.3
@@ -25,14 +26,17 @@ require (
 
 require (
 	github.com/ahmetb/go-linq/v3 v3.2.0 // indirect
+	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/enbility/go-avahi v0.0.0-20240909195612-d5de6b280d7a // indirect
 	github.com/enbility/zeroconf/v2 v2.0.0-20240920094356-be1cae74fda6 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/golanguzb70/lrucache v1.2.0 // indirect
+	github.com/influxdata/line-protocol v0.0.0-20200327222509-2487e7298839 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/lestrrat-go/strftime v1.1.0 // indirect
 	github.com/miekg/dns v1.1.63 // indirect
+	github.com/oapi-codegen/runtime v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rickb777/date v1.21.1 // indirect
 	github.com/rickb777/plural v1.4.2 // indirect
