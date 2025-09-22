@@ -43,7 +43,7 @@ DataModel:
     Token : "${TIC4EEBUS_INFLUXDB_TOKEN}" # example: "He_nwgoqXu4XggIzaiUWFHALKnS5JskdTLzGlSYeJMNkjCD-pyR6Yc5Hvl8NWj5Qo5C80mLvuJAS1IuqOcq4GQZZ"
     IpAddress : "127.0.0.1"
     TcpPort : 8086
-# Tele indformation client (TIC) configuration
+# Tele information client (TIC) configuration
 TeleInformationClient:
   TIC2Websocket:
     IPAddress : "127.0.0.1"
