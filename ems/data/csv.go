@@ -3,18 +3,15 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package ems
+package data
 
 import (
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
-	"slices"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/Enedis-OSS/tic4eebus/config"
@@ -22,19 +19,17 @@ import (
 	"github.com/Enedis-OSS/tic4eebus/linkymeter"
 	ucapi "github.com/enbility/eebus-go/usecases/api"
 	"github.com/enbility/spine-go/model"
-	"github.com/google/go-cmp/cmp"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	log "github.com/sirupsen/logrus"
 )
 
 const (
-	CSV_COLUMN_SEPARATOR   = ';'
-	CSV_FLOATING_PRECISION = 3
-	DIAGNOSIS_NO_ERROR     = "No error"
+	column_separator   = ';'
+	floating_precision = 3
 )
 
 var (
-	CSV_COLUMNS = []string{
+	headers = []string{
 		"Timestamp",
 		"IsConnected",
 		"HasMeter",
@@ -132,70 +127,34 @@ var (
 	}
 )
 
-type OverloadProtectionData struct {
-	Active            bool                  `json:"Active"`
-	Value             float64               `json:"Value"`
-	Start             time.Time             `json:"Start"`
-	ResultCode        model.ErrorNumberType `json:"ResultCode"`
-	ResultDescription model.DescriptionType `json:"ResultDescription"`
-	LockActive        bool                  `json:"LockActive"`
-	LockStart         time.Time             `json:"LockStart"`
-}
-
-type DiagnosisData struct {
-	OperatingState model.DeviceDiagnosisOperatingStateType `json:"OperatingState"`
-	LastErrorCode  model.LastErrorCodeType                 `json:"LastErrorCode"`
-}
-
-type EnergyGuardDataModel struct {
-	IsConnected        bool                   `json:"IsConnected"`
-	HasMeter           bool                   `json:"HasMeter"`
-	HasOPEV            bool                   `json:"HasOPEV"`
-	Vehicle            map[string]interface{} `json:"Vehicle"`
-	Wallbox            map[string]interface{} `json:"Wallbox"`
-	Meter              linkymeter.MeterData   `json:"Meter"`
-	OverloadProtection OverloadProtectionData `json:"OverloadProtection"`
-	Diagnosis          DiagnosisData          `json:"Diagnosis"`
-}
-
-type EnergyGuardData struct {
-	model                EnergyGuardDataModel
-	deviceDiagnosisState model.DeviceDiagnosisStateDataType
-	access               sync.Mutex
-	logger               *log.Logger
-}
-
-type CsvFormatter struct {
+type formatter struct {
 	TimestampFormat string
 	ColumnSeparator string
 }
 
-func (f *CsvFormatter) Format(entry *log.Entry) ([]byte, error) {
+type CsvWriter struct {
+	logger *log.Logger
+}
+
+func (f *formatter) Format(entry *log.Entry) ([]byte, error) {
 	timestamp := entry.Time.Format(f.TimestampFormat)
 	return []byte(fmt.Sprintf("%s%s%s\n", timestamp, f.ColumnSeparator, entry.Message)), nil
 }
 
-func NewEnergyGuardData(dataModelConfig config.DataModelConfig) *EnergyGuardData {
-	data := &EnergyGuardData{}
-
-	data.model.IsConnected = false
-	data.model.HasMeter = false
-	data.model.HasMeter = false
-	data.model.Vehicle = make(map[string]interface{})
-	data.model.Wallbox = make(map[string]interface{})
-	data.model.Diagnosis.OperatingState = model.DeviceDiagnosisOperatingStateTypeNormalOperation
-	data.model.Diagnosis.LastErrorCode = model.LastErrorCodeType(DIAGNOSIS_NO_ERROR)
-	data.deviceDiagnosisState.OperatingState = &data.model.Diagnosis.OperatingState
-	data.deviceDiagnosisState.LastErrorCode = &data.model.Diagnosis.LastErrorCode
+func NewCsvWriter(config *config.CsvConfig) *CsvWriter {
+	if config == nil {
+		return nil
+	}
+	handler := &CsvWriter{}
 
 	// Create a CSV logger
-	data.logger = log.New()
+	handler.logger = log.New()
 
-	csvFileExtension := filepath.Ext(dataModelConfig.Csv.FilePath)
-	csvFileWithoutExtension := strings.TrimSuffix(dataModelConfig.Csv.FilePath, csvFileExtension)
-	csvFilePathWithPattern := csvFileWithoutExtension + dataModelConfig.Csv.Rotation.PeriodPattern + csvFileExtension
-	csvRotationTime := time.Duration(float64(dataModelConfig.Csv.Rotation.PeriodInHours) * float64(time.Hour))
-	csvMaxAge := time.Duration(float64(dataModelConfig.Csv.Rotation.PeriodCount) * float64(dataModelConfig.Csv.Rotation.PeriodInHours) * float64(time.Hour))
+	csvFileExtension := filepath.Ext(config.FilePath)
+	csvFileWithoutExtension := strings.TrimSuffix(config.FilePath, csvFileExtension)
+	csvFilePathWithPattern := csvFileWithoutExtension + config.Rotation.PeriodPattern + csvFileExtension
+	csvRotationTime := time.Duration(float64(config.Rotation.PeriodInHours) * float64(time.Hour))
+	csvMaxAge := time.Duration(float64(config.Rotation.PeriodCount) * float64(config.Rotation.PeriodInHours) * float64(time.Hour))
 	// Configure csv with rotation matching with config
 	writer, _ := rotatelogs.New(
 		csvFilePathWithPattern,
@@ -205,411 +164,41 @@ func NewEnergyGuardData(dataModelConfig config.DataModelConfig) *EnergyGuardData
 			if e.Type() != rotatelogs.FileRotatedEventType {
 				return
 			}
-			writeCSVTitle((e.(*rotatelogs.FileRotatedEvent).CurrentFile()))
+			writeHeaders((e.(*rotatelogs.FileRotatedEvent).CurrentFile()))
 		})),
 	)
-	data.logger.SetFormatter(&CsvFormatter{
+	handler.logger.SetFormatter(&formatter{
 		TimestampFormat: "2006-01-02 15:04:05.000",
-		ColumnSeparator: string(CSV_COLUMN_SEPARATOR),
+		ColumnSeparator: string(column_separator),
 	})
-	data.logger.SetOutput(writer)
+	handler.logger.SetOutput(writer)
 	writer.Rotate()
 
-	return data
+	return handler
 }
 
-func writeCSVTitle(fileName string) {
+func (h *CsvWriter) Save(model DataModel) {
+	if h == nil {
+		return
+	}
+	columns := extractColumns(model)
+	message := strings.Join(columns, string(column_separator))
+	h.logger.Info(message)
+}
+
+func writeHeaders(fileName string) {
 	file, err := os.Create(fileName)
 	if err != nil {
 		log.Fatal(err)
 	}
 	writer := csv.NewWriter(file)
-	writer.Comma = CSV_COLUMN_SEPARATOR
-	writer.Write(CSV_COLUMNS)
+	writer.Comma = column_separator
+	writer.Write(headers)
 	writer.Flush()
 	defer file.Close()
 }
 
-func IsOverloadProtectionEqual(overloadProtection OverloadProtectionData, other OverloadProtectionData) bool {
-	if overloadProtection.Active != other.Active {
-		return false
-	}
-	if overloadProtection.Value != other.Value {
-		return false
-	}
-	if overloadProtection.Start != other.Start {
-		return false
-	}
-	if overloadProtection.ResultCode != other.ResultCode {
-		return false
-	}
-	if overloadProtection.ResultDescription != other.ResultDescription {
-		return false
-	}
-	if overloadProtection.LockStart != other.LockStart {
-		return false
-	}
-	if overloadProtection.LockActive != other.LockActive {
-		return false
-	}
-
-	return true
-}
-
-func (e *EnergyGuardData) IsConnected() (isConnected bool) {
-	e.access.Lock()
-	isConnected = e.model.IsConnected
-	e.access.Unlock()
-
-	return isConnected
-}
-
-func (e *EnergyGuardData) SetIsConnected(isConnected bool) (hasChanged bool) {
-	e.access.Lock()
-	if isConnected != e.model.IsConnected {
-		e.model.IsConnected = isConnected
-		hasChanged = true
-	}
-	e.access.Unlock()
-	if hasChanged {
-		e.save()
-	}
-
-	return hasChanged
-}
-
-func (e *EnergyGuardData) HasMeter() (hasMeter bool) {
-	e.access.Lock()
-	hasMeter = e.model.HasMeter
-	e.access.Unlock()
-
-	return hasMeter
-}
-
-func (e *EnergyGuardData) SetHasMeter(hasMeter bool) (hasChanged bool) {
-	e.access.Lock()
-	if hasMeter != e.model.HasMeter {
-		e.model.HasMeter = hasMeter
-		hasChanged = true
-	}
-	e.access.Unlock()
-	if hasChanged {
-		e.save()
-	}
-
-	return hasChanged
-}
-
-func (e *EnergyGuardData) HasOPEV() (hasOPEV bool) {
-	e.access.Lock()
-	hasOPEV = e.model.HasOPEV
-	e.access.Unlock()
-
-	return hasOPEV
-}
-
-func (e *EnergyGuardData) SetHasOPEV(hasOPEV bool) (hasChanged bool) {
-	e.access.Lock()
-	if hasOPEV != e.model.HasOPEV {
-		e.model.HasOPEV = hasOPEV
-		hasChanged = true
-	}
-	e.access.Unlock()
-	if hasChanged {
-		e.save()
-	}
-
-	return hasChanged
-}
-
-func (e *EnergyGuardData) GetVehicle() (vehicle map[string]interface{}) {
-	vehicle = make(map[string]interface{})
-	e.access.Lock()
-	for key, value := range e.model.Vehicle {
-		vehicle[key] = value
-	}
-	e.access.Unlock()
-
-	return vehicle
-}
-
-func (e *EnergyGuardData) SetVehicle(vehicle map[string]interface{}) (hasChanged bool) {
-	e.access.Lock()
-	// compare and update vehicle data
-	for k, v := range vehicle {
-		oldValue, ok := e.model.Vehicle[k]
-		if !ok {
-			e.model.Vehicle[k] = v
-			hasChanged = true
-		} else {
-			if !cmp.Equal(v, oldValue) {
-				e.model.Vehicle[k] = v
-				hasChanged = true
-			}
-		}
-	}
-	e.access.Unlock()
-	if hasChanged {
-		e.save()
-	}
-
-	return hasChanged
-}
-
-func (e *EnergyGuardData) GetWallbox() (wallbox map[string]interface{}) {
-	wallbox = make(map[string]interface{})
-	e.access.Lock()
-	for key, value := range e.model.Wallbox {
-		wallbox[key] = value
-	}
-	e.access.Unlock()
-
-	return wallbox
-}
-
-func (e *EnergyGuardData) SetWallbox(wallbox map[string]interface{}) (hasChanged bool) {
-	e.access.Lock()
-	for k, v := range wallbox {
-		oldValue, ok := e.model.Wallbox[k]
-		if !ok {
-			e.model.Wallbox[k] = v
-			hasChanged = true
-		} else {
-			if !cmp.Equal(v, oldValue) {
-				e.model.Wallbox[k] = v
-				hasChanged = true
-			}
-		}
-	}
-	e.access.Unlock()
-	if hasChanged {
-		e.save()
-	}
-
-	return hasChanged
-}
-
-func (e *EnergyGuardData) GeMeter() (meter linkymeter.MeterData) {
-	e.access.Lock()
-	meter = linkymeter.MeterData(e.model.Meter)
-	e.access.Unlock()
-
-	return meter
-}
-
-func (e *EnergyGuardData) SetMeter(meter linkymeter.MeterData) (hasChanged bool) {
-	e.access.Lock()
-	if !linkymeter.IsEqual(e.model.Meter, meter) {
-		e.model.Meter = linkymeter.MeterData(meter)
-		e.model.HasMeter = true
-		hasChanged = true
-	}
-	e.access.Unlock()
-	if hasChanged {
-		e.save()
-	}
-
-	return hasChanged
-}
-
-func (e *EnergyGuardData) GeMeterMinAvailableCurrent() (minAvailableCurrent float64) {
-	e.access.Lock()
-	minAvailableCurrent = slices.Min(e.model.Meter.AvailableCurrentPerPhase)
-	e.access.Unlock()
-
-	return minAvailableCurrent
-}
-
-func (e *EnergyGuardData) GeOverloadProtection() (overloadProtection OverloadProtectionData) {
-	e.access.Lock()
-	overloadProtection = OverloadProtectionData(e.model.OverloadProtection)
-	e.access.Unlock()
-
-	return overloadProtection
-}
-
-func (e *EnergyGuardData) SetOverloadProtection(overloadprotection OverloadProtectionData) (hasChanged bool) {
-	e.access.Lock()
-	if !IsOverloadProtectionEqual(e.model.OverloadProtection, overloadprotection) {
-		e.model.OverloadProtection = OverloadProtectionData(overloadprotection)
-		hasChanged = true
-	}
-	e.access.Unlock()
-	if hasChanged {
-		e.save()
-	}
-
-	return hasChanged
-}
-func (e *EnergyGuardData) GetDiagnosisState() *model.DeviceDiagnosisStateDataType {
-	return &e.deviceDiagnosisState
-}
-
-func (e *EnergyGuardData) GetDiagnosis() (diagnosis DiagnosisData) {
-	e.access.Lock()
-	diagnosis = e.model.Diagnosis
-	e.access.Unlock()
-
-	return diagnosis
-}
-
-func (e *EnergyGuardData) SetDiagnosis(operatingState model.DeviceDiagnosisOperatingStateType, lastErrorCode model.LastErrorCodeType) (hasChanged bool) {
-	e.access.Lock()
-	if lastErrorCode != e.model.Diagnosis.LastErrorCode {
-		e.model.Diagnosis.OperatingState = operatingState
-		e.model.Diagnosis.LastErrorCode = lastErrorCode
-		hasChanged = true
-	}
-	e.access.Unlock()
-	if hasChanged {
-		e.save()
-	}
-
-	return hasChanged
-}
-
-func (e *EnergyGuardData) DisableOverloadProtectionActive() {
-	e.access.Lock()
-	if e.model.OverloadProtection.Active {
-		e.model.OverloadProtection.Value = 0
-		e.model.OverloadProtection.Active = false
-		e.access.Unlock()
-		e.save()
-		return
-	}
-	e.access.Unlock()
-}
-
-func (e *EnergyGuardData) GetOverloadProtectionValue() (limitValue float64) {
-	e.access.Lock()
-	limitValue = e.model.OverloadProtection.Value
-	e.access.Unlock()
-
-	return limitValue
-}
-
-func (e *EnergyGuardData) SetOverloadProtectionValue(limitValue float64) {
-	e.access.Lock()
-	e.model.OverloadProtection.Value = limitValue
-	e.model.OverloadProtection.Active = true
-	e.model.OverloadProtection.Start = time.Now()
-	e.access.Unlock()
-	e.save()
-}
-
-func (e *EnergyGuardData) SetOverloadProtectionResult(result model.ResultDataType) (hasChanged bool) {
-	e.access.Lock()
-	if result.ErrorNumber != nil {
-		if *result.ErrorNumber != e.model.OverloadProtection.ResultCode {
-			e.model.OverloadProtection.ResultCode = *result.ErrorNumber
-			hasChanged = true
-		}
-		if result.Description != nil {
-			if *result.Description != e.model.OverloadProtection.ResultDescription {
-				e.model.OverloadProtection.ResultDescription = *result.Description
-				hasChanged = true
-			}
-		} else {
-			if e.model.OverloadProtection.ResultDescription != "" {
-				e.model.OverloadProtection.ResultDescription = ""
-				hasChanged = true
-			}
-		}
-	} else {
-		if e.model.OverloadProtection.ResultCode != model.ErrorNumberTypeGeneralError {
-			e.model.OverloadProtection.ResultCode = model.ErrorNumberTypeGeneralError
-			hasChanged = true
-		}
-		if e.model.OverloadProtection.ResultDescription != "undefined error" {
-			e.model.OverloadProtection.ResultDescription = "undefined error"
-			hasChanged = true
-		}
-	}
-	e.access.Unlock()
-	if hasChanged {
-		e.save()
-	}
-
-	return hasChanged
-}
-
-func (e *EnergyGuardData) GetOverloadProtectionLockStart() (lockStart time.Time) {
-	e.access.Lock()
-	lockStart = e.model.OverloadProtection.LockStart
-	e.access.Unlock()
-
-	return lockStart
-}
-
-func (e *EnergyGuardData) SetOverloadProtectionLockStart(lockStart time.Time) (hasChanged bool) {
-	e.access.Lock()
-	if lockStart != e.model.OverloadProtection.Start {
-		e.model.OverloadProtection.LockStart = lockStart
-		e.model.OverloadProtection.LockActive = true
-		hasChanged = true
-	}
-	e.access.Unlock()
-	if hasChanged {
-		e.save()
-	}
-
-	return hasChanged
-}
-
-func (e *EnergyGuardData) GetOverloadProtectionLockDuration() (lockDuration time.Duration) {
-	now := time.Now()
-	e.access.Lock()
-	lockDuration = now.Sub(e.model.OverloadProtection.LockStart)
-	e.access.Unlock()
-
-	return lockDuration
-}
-
-func (e *EnergyGuardData) SetOverloadProtectionLockActive(lockActive bool) (hasChanged bool) {
-	e.access.Lock()
-	if lockActive != e.model.OverloadProtection.LockActive {
-		e.model.OverloadProtection.LockActive = lockActive
-		hasChanged = true
-	}
-	e.access.Unlock()
-	if hasChanged {
-		e.save()
-	}
-
-	return hasChanged
-}
-
-func (e *EnergyGuardData) GetModel() (model EnergyGuardDataModel) {
-	model = EnergyGuardDataModel{
-		IsConnected:        e.IsConnected(),
-		HasMeter:           e.HasMeter(),
-		HasOPEV:            e.HasOPEV(),
-		Vehicle:            e.GetVehicle(),
-		Wallbox:            e.GetWallbox(),
-		Meter:              e.GeMeter(),
-		OverloadProtection: e.GeOverloadProtection(),
-		Diagnosis:          e.GetDiagnosis(),
-	}
-
-	return model
-}
-
-func (e *EnergyGuardData) Print() {
-	model := e.GetModel()
-	jsonBytes, error := json.MarshalIndent(model, "", "  ")
-	if error == nil {
-		log.Infof("EnergyGuardDataModel : \n%s\n", string(jsonBytes))
-	}
-}
-
-func (e *EnergyGuardData) save() {
-	model := e.GetModel()
-	columns := extractColumns(model)
-	message := strings.Join(columns, string(CSV_COLUMN_SEPARATOR))
-	e.logger.Info(message)
-}
-
-func extractColumns(model EnergyGuardDataModel) []string {
+func extractColumns(model DataModel) []string {
 	IsConnected := strconv.FormatBool(model.IsConnected)
 	HasMeter := strconv.FormatBool(model.HasMeter)
 	HasOPEV := strconv.FormatBool(model.HasOPEV)
@@ -679,7 +268,7 @@ func extractColumns(model EnergyGuardDataModel) []string {
 	Meter_ApparentImportPower1, Meter_ApparentImportPower2, Meter_ApparentImportPower3 := extractColumn_Meter_ApparentImportPowerPerPhase(model.Meter)
 	Meter_AvailableCurrent1, Meter_AvailableCurrent2, Meter_AvailableCurrent3 := extractColumn_Meter_AvailableCurrentPerPhase(model.Meter)
 	OverloadProtection_Active := strconv.FormatBool(model.OverloadProtection.Active)
-	OverloadProtection_Value := strconv.FormatFloat(model.OverloadProtection.Value, 'f', CSV_FLOATING_PRECISION, 64)
+	OverloadProtection_Value := strconv.FormatFloat(model.OverloadProtection.Value, 'f', floating_precision, 64)
 	OverloadProtection_Start := model.OverloadProtection.Start.String()
 	OverloadProtection_ResultCode := strconv.FormatInt(int64(model.OverloadProtection.ResultCode), 10)
 	OverloadProtection_ResultDescription := string(model.OverloadProtection.ResultDescription)
@@ -825,9 +414,9 @@ func extractColumn_EV_ChargingPowerLimits(vehicle map[string]interface{}) (min s
 
 	if ok {
 		chargingPowerLimits := value.(evse.ChargingPowerLimits)
-		min = strconv.FormatFloat(chargingPowerLimits.Min, 'f', CSV_FLOATING_PRECISION, 64)
-		max = strconv.FormatFloat(chargingPowerLimits.Max, 'f', CSV_FLOATING_PRECISION, 64)
-		standby = strconv.FormatFloat(chargingPowerLimits.Standby, 'f', CSV_FLOATING_PRECISION, 64)
+		min = strconv.FormatFloat(chargingPowerLimits.Min, 'f', floating_precision, 64)
+		max = strconv.FormatFloat(chargingPowerLimits.Max, 'f', floating_precision, 64)
+		standby = strconv.FormatFloat(chargingPowerLimits.Standby, 'f', floating_precision, 64)
 	}
 
 	return min, max, standby
@@ -847,31 +436,31 @@ func extractColumn_EV_CurrentLimits(vehicle map[string]interface{}) (min1 string
 	if ok {
 		currentLimits := value.(evse.CurrentLimits)
 		if len(currentLimits.Min) > 0 {
-			min1 = strconv.FormatFloat(currentLimits.Min[0], 'f', CSV_FLOATING_PRECISION, 64)
+			min1 = strconv.FormatFloat(currentLimits.Min[0], 'f', floating_precision, 64)
 		}
 		if len(currentLimits.Min) > 1 {
-			min2 = strconv.FormatFloat(currentLimits.Min[1], 'f', CSV_FLOATING_PRECISION, 64)
+			min2 = strconv.FormatFloat(currentLimits.Min[1], 'f', floating_precision, 64)
 		}
 		if len(currentLimits.Min) > 2 {
-			min3 = strconv.FormatFloat(currentLimits.Min[2], 'f', CSV_FLOATING_PRECISION, 64)
+			min3 = strconv.FormatFloat(currentLimits.Min[2], 'f', floating_precision, 64)
 		}
 		if len(currentLimits.Max) > 0 {
-			max1 = strconv.FormatFloat(currentLimits.Max[0], 'f', CSV_FLOATING_PRECISION, 64)
+			max1 = strconv.FormatFloat(currentLimits.Max[0], 'f', floating_precision, 64)
 		}
 		if len(currentLimits.Max) > 1 {
-			max2 = strconv.FormatFloat(currentLimits.Max[1], 'f', CSV_FLOATING_PRECISION, 64)
+			max2 = strconv.FormatFloat(currentLimits.Max[1], 'f', floating_precision, 64)
 		}
 		if len(currentLimits.Max) > 2 {
-			max3 = strconv.FormatFloat(currentLimits.Max[2], 'f', CSV_FLOATING_PRECISION, 64)
+			max3 = strconv.FormatFloat(currentLimits.Max[2], 'f', floating_precision, 64)
 		}
 		if len(currentLimits.Default) > 0 {
-			max1 = strconv.FormatFloat(currentLimits.Default[0], 'f', CSV_FLOATING_PRECISION, 64)
+			max1 = strconv.FormatFloat(currentLimits.Default[0], 'f', floating_precision, 64)
 		}
 		if len(currentLimits.Default) > 1 {
-			max2 = strconv.FormatFloat(currentLimits.Default[1], 'f', CSV_FLOATING_PRECISION, 64)
+			max2 = strconv.FormatFloat(currentLimits.Default[1], 'f', floating_precision, 64)
 		}
 		if len(currentLimits.Default) > 2 {
-			max3 = strconv.FormatFloat(currentLimits.Default[2], 'f', CSV_FLOATING_PRECISION, 64)
+			max3 = strconv.FormatFloat(currentLimits.Default[2], 'f', floating_precision, 64)
 		}
 	}
 	return min1, min2, min3, max1, max2, max3, default1, default2, default3
@@ -883,13 +472,13 @@ func extractColumn_CurrentPerPhase(vehicle map[string]interface{}) (currentPhase
 	if ok {
 		currentPerPhase := value.([]float64)
 		if len(currentPerPhase) > 0 {
-			currentPhase1 = strconv.FormatFloat(currentPerPhase[0], 'f', CSV_FLOATING_PRECISION, 64)
+			currentPhase1 = strconv.FormatFloat(currentPerPhase[0], 'f', floating_precision, 64)
 		}
 		if len(currentPerPhase) > 1 {
-			currentPhase2 = strconv.FormatFloat(currentPerPhase[1], 'f', CSV_FLOATING_PRECISION, 64)
+			currentPhase2 = strconv.FormatFloat(currentPerPhase[1], 'f', floating_precision, 64)
 		}
 		if len(currentPerPhase) > 2 {
-			currentPhase3 = strconv.FormatFloat(currentPerPhase[2], 'f', CSV_FLOATING_PRECISION, 64)
+			currentPhase3 = strconv.FormatFloat(currentPerPhase[2], 'f', floating_precision, 64)
 		}
 	}
 
@@ -901,7 +490,7 @@ func extractColumn_EV_EnergyCharged(vehicle map[string]interface{}) (energyCharg
 
 	if ok {
 		energyChargedValue := value.(float64)
-		energyCharged = strconv.FormatFloat(energyChargedValue, 'f', CSV_FLOATING_PRECISION, 64)
+		energyCharged = strconv.FormatFloat(energyChargedValue, 'f', floating_precision, 64)
 	}
 
 	return energyCharged
@@ -949,15 +538,15 @@ func extractColumn_EV_LoadControlLimits(vehicle map[string]interface{}) (isChang
 			case model.ElectricalConnectionPhaseNameTypeA:
 				isChangeable1 = strconv.FormatBool(limits[i].IsChangeable)
 				isActive1 = strconv.FormatBool(limits[i].IsActive)
-				limit1 = strconv.FormatFloat(limits[i].Value, 'f', CSV_FLOATING_PRECISION, 64)
+				limit1 = strconv.FormatFloat(limits[i].Value, 'f', floating_precision, 64)
 			case model.ElectricalConnectionPhaseNameTypeB:
 				isChangeable2 = strconv.FormatBool(limits[i].IsChangeable)
 				isActive2 = strconv.FormatBool(limits[i].IsActive)
-				limit2 = strconv.FormatFloat(limits[i].Value, 'f', CSV_FLOATING_PRECISION, 64)
+				limit2 = strconv.FormatFloat(limits[i].Value, 'f', floating_precision, 64)
 			case model.ElectricalConnectionPhaseNameTypeC:
 				isChangeable3 = strconv.FormatBool(limits[i].IsChangeable)
 				isActive3 = strconv.FormatBool(limits[i].IsActive)
-				limit3 = strconv.FormatFloat(limits[i].Value, 'f', CSV_FLOATING_PRECISION, 64)
+				limit3 = strconv.FormatFloat(limits[i].Value, 'f', floating_precision, 64)
 			}
 		}
 	}
@@ -1026,13 +615,13 @@ func extractColumn_EV_PowerPerPhase(vehicle map[string]interface{}) (powerPhase1
 	if ok {
 		powerPerPhase := value.([]float64)
 		if len(powerPerPhase) > 0 {
-			powerPhase1 = strconv.FormatFloat(powerPerPhase[0], 'f', CSV_FLOATING_PRECISION, 64)
+			powerPhase1 = strconv.FormatFloat(powerPerPhase[0], 'f', floating_precision, 64)
 		}
 		if len(powerPerPhase) > 1 {
-			powerPhase2 = strconv.FormatFloat(powerPerPhase[1], 'f', CSV_FLOATING_PRECISION, 64)
+			powerPhase2 = strconv.FormatFloat(powerPerPhase[1], 'f', floating_precision, 64)
 		}
 		if len(powerPerPhase) > 2 {
-			powerPhase3 = strconv.FormatFloat(powerPerPhase[2], 'f', CSV_FLOATING_PRECISION, 64)
+			powerPhase3 = strconv.FormatFloat(powerPerPhase[2], 'f', floating_precision, 64)
 		}
 	}
 
@@ -1108,13 +697,13 @@ func extractColumn_EVSE_OperatingState(wallbox map[string]interface{}) (operatin
 func extractColumn_Meter_OverLoadCurrentLimitPerPhase(meter linkymeter.MeterData) (limitPhase1 string, limitPhase2 string, limitPhase3 string) {
 
 	if len(meter.OverLoadCurrentLimitPerPhase) > 0 {
-		limitPhase1 = strconv.FormatFloat(meter.OverLoadCurrentLimitPerPhase[0], 'f', CSV_FLOATING_PRECISION, 64)
+		limitPhase1 = strconv.FormatFloat(meter.OverLoadCurrentLimitPerPhase[0], 'f', floating_precision, 64)
 	}
 	if len(meter.OverLoadCurrentLimitPerPhase) > 1 {
-		limitPhase2 = strconv.FormatFloat(meter.OverLoadCurrentLimitPerPhase[1], 'f', CSV_FLOATING_PRECISION, 64)
+		limitPhase2 = strconv.FormatFloat(meter.OverLoadCurrentLimitPerPhase[1], 'f', floating_precision, 64)
 	}
 	if len(meter.OverLoadCurrentLimitPerPhase) > 2 {
-		limitPhase3 = strconv.FormatFloat(meter.OverLoadCurrentLimitPerPhase[2], 'f', CSV_FLOATING_PRECISION, 64)
+		limitPhase3 = strconv.FormatFloat(meter.OverLoadCurrentLimitPerPhase[2], 'f', floating_precision, 64)
 	}
 
 	return limitPhase1, limitPhase2, limitPhase3
@@ -1138,13 +727,13 @@ func extractColumn_Meter_RmsVoltagePerPhase(meter linkymeter.MeterData) (voltage
 func extractColumn_Meter_RmsCurrentPerPhase(meter linkymeter.MeterData) (currentPhase1 string, currentPhase2 string, currentPhase3 string) {
 
 	if len(meter.RmsCurrentPerPhase) > 0 {
-		currentPhase1 = strconv.FormatFloat(meter.RmsCurrentPerPhase[0], 'f', CSV_FLOATING_PRECISION, 64)
+		currentPhase1 = strconv.FormatFloat(meter.RmsCurrentPerPhase[0], 'f', floating_precision, 64)
 	}
 	if len(meter.RmsCurrentPerPhase) > 1 {
-		currentPhase2 = strconv.FormatFloat(meter.RmsCurrentPerPhase[1], 'f', CSV_FLOATING_PRECISION, 64)
+		currentPhase2 = strconv.FormatFloat(meter.RmsCurrentPerPhase[1], 'f', floating_precision, 64)
 	}
 	if len(meter.RmsCurrentPerPhase) > 2 {
-		currentPhase3 = strconv.FormatFloat(meter.RmsCurrentPerPhase[2], 'f', CSV_FLOATING_PRECISION, 64)
+		currentPhase3 = strconv.FormatFloat(meter.RmsCurrentPerPhase[2], 'f', floating_precision, 64)
 	}
 
 	return currentPhase1, currentPhase2, currentPhase3
@@ -1168,13 +757,13 @@ func extractColumn_Meter_ApparentImportPowerPerPhase(meter linkymeter.MeterData)
 func extractColumn_Meter_AvailableCurrentPerPhase(meter linkymeter.MeterData) (availableCurrent1 string, availableCurrent2 string, availableCurrent3 string) {
 
 	if len(meter.AvailableCurrentPerPhase) > 0 {
-		availableCurrent1 = strconv.FormatFloat(meter.AvailableCurrentPerPhase[0], 'f', CSV_FLOATING_PRECISION, 64)
+		availableCurrent1 = strconv.FormatFloat(meter.AvailableCurrentPerPhase[0], 'f', floating_precision, 64)
 	}
 	if len(meter.AvailableCurrentPerPhase) > 1 {
-		availableCurrent2 = strconv.FormatFloat(meter.AvailableCurrentPerPhase[1], 'f', CSV_FLOATING_PRECISION, 64)
+		availableCurrent2 = strconv.FormatFloat(meter.AvailableCurrentPerPhase[1], 'f', floating_precision, 64)
 	}
 	if len(meter.AvailableCurrentPerPhase) > 2 {
-		availableCurrent3 = strconv.FormatFloat(meter.AvailableCurrentPerPhase[2], 'f', CSV_FLOATING_PRECISION, 64)
+		availableCurrent3 = strconv.FormatFloat(meter.AvailableCurrentPerPhase[2], 'f', floating_precision, 64)
 	}
 
 	return availableCurrent1, availableCurrent2, availableCurrent3

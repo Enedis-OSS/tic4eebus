@@ -33,12 +33,21 @@ Log:
 
 # Data model configuration
 DataModel:
-  Csv:
+  # Csv file configuration (optional)
+  Csv: # If provided all fields must be provided
     FilePath : "var/data/EnergyGuardDataModel.csv"
     Rotation:
       PeriodInHours : 24 # Each day a new file is created
       PeriodCount : 7 # 7 files maximum are created (7 days of data model)
       PeriodPattern: "-%Y-%m-%d" # Each csv file name contains the year-month-day of creation
+
+  # InfluxDB configuration (optional)
+  InfluxDb: # If provided all fields must be provided
+    Bucket : "demo-bucket"
+    Org : "demo-org"
+    Token : "${TIC4EEBUS_INFLUXDB_TOKEN}" # Example: "He_nwgoqXu4XggIzaiUWFHALKnS5JskdTLzGlSYeJMNkjCD-pyR6Yc5Hvl8NWj5Qo5C80mLvuJAS1IuqOcq4GQZZ"
+    IpAddress : "127.0.0.1"
+    TcpPort : 8086
 
 # Tele information client (TIC) configuration
 TeleInformationClient:

@@ -33,7 +33,7 @@ type PlainFormatter struct {
 
 const (
 	DEFAULT_CONFIG_FILE_PATH = "config.yaml"
-	VERSION                  = "v1.0.0"
+	VERSION                  = "v1.0.0-beta"
 )
 
 var (
