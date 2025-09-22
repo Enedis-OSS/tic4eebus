@@ -100,7 +100,7 @@ const (
 
 func LoadConfig(configFilePath string) (Config, error) {
 	var config Config
-	configMap := make(map[interface{}]interface{})
+	configMap := make(map[any]any)
 	data, err := os.ReadFile(configFilePath)
 	if err != nil {
 		return config, fmt.Errorf("error reading YAML file: %v", err)
@@ -118,11 +118,15 @@ func LoadConfig(configFilePath string) (Config, error) {
 	if err != nil {
 		return config, err
 	}
-	config.Vehicle.UpdateDataPeriodInSeconds, config.Vehicle.DataPersistent, err = loadVehicle(configMap)
+	config.Vehicle.UpdateDataPeriodInSeconds,
+		config.Vehicle.DataPersistent,
+		err = loadVehicle(configMap)
 	if err != nil {
 		return config, err
 	}
-	config.Wallbox.UpdateDataPeriodInSeconds, config.Wallbox.DataPersistent, err = loadWallbox(configMap)
+	config.Wallbox.UpdateDataPeriodInSeconds,
+		config.Wallbox.DataPersistent,
+		err = loadWallbox(configMap)
 	if err != nil {
 		return config, err
 	}
@@ -135,14 +139,18 @@ func LoadConfig(configFilePath string) (Config, error) {
 	if err != nil {
 		return config, err
 	}
-	config.DataModel.Csv.FilePath,
-		config.DataModel.Csv.Rotation.PeriodInHours,
-		config.DataModel.Csv.Rotation.PeriodCount,
-		config.DataModel.Csv.Rotation.PeriodPattern,
-		err = loadDataModel(configMap)
-	if err != nil {
-		return config, err
+	if configMap["DataModel"] != nil {
+		// DataModel section is optional
+		config.DataModel.Csv.FilePath,
+			config.DataModel.Csv.Rotation.PeriodInHours,
+			config.DataModel.Csv.Rotation.PeriodCount,
+			config.DataModel.Csv.Rotation.PeriodPattern,
+			err = loadDataModel(configMap)
+		if err != nil {
+			return config, err
+		}
 	}
+
 	config.TeleInformationClient.TIC2Websocket.IPAddress,
 		config.TeleInformationClient.TIC2Websocket.TCPPort,
 		config.TeleInformationClient.TICIdentifier.SerialNumber,
@@ -262,7 +270,7 @@ func loadLog(configMap map[interface{}]interface{}) (level log.Level, filePath s
 	return level, filePath, periodInHours, periodCount, periodPattern, err
 }
 
-func loadDataModel(configMap map[interface{}]interface{}) (filePath string, periodInHours int, periodCount int, periodPattern string, err error) {
+func loadDataModel(configMap map[any]any) (filePath string, periodInHours int, periodCount int, periodPattern string, err error) {
 	paramParentName, paramName := "", "DataModel"
 	dataModelMap, err := loadParameterAsMap(configMap, "", "DataModel")
 	if err != nil {
@@ -372,7 +380,7 @@ func loadEEBUS(configMap map[interface{}]interface{}) (serverPort int,
 	return serverPort, remoteSKI, certificateFilePath, privateKeyFilePath, vendorCode, deviceBrand, deviceModel, serialNumber, heartbeatTimeoutInSeconds, nil
 }
 
-func loadParameterAsMap(parameterMap map[interface{}]interface{}, paramParentName string, paramName string) (map[interface{}]interface{}, error) {
+func loadParameterAsMap(parameterMap map[any]any, paramParentName string, paramName string) (map[any]any, error) {
 	parameter, ok := parameterMap[paramName]
 	if !ok {
 		if len(paramParentName) == 0 {
@@ -381,7 +389,7 @@ func loadParameterAsMap(parameterMap map[interface{}]interface{}, paramParentNam
 			return nil, fmt.Errorf("%s: %s.%s not found", INVALID_PARAMETER, paramParentName, paramName)
 		}
 	}
-	parameterValue, ok := parameter.(map[interface{}]interface{})
+	parameterValue, ok := parameter.(map[any]any)
 	if !ok {
 		return nil, fmt.Errorf("%s: %s.%s is not a map (%v)", INVALID_PARAMETER, paramParentName, paramName, reflect.TypeOf(parameter))
 	}
