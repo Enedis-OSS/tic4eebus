@@ -29,7 +29,7 @@ func NewInfluxDbWriter(config *config.InfluxDbConfig) *InfluxDbWriter {
 	}
 	handler := &InfluxDbWriter{}
 
-	url := fmt.Sprintf("%s:%d", config.IpAddress, config.TcpPort)
+	url := fmt.Sprintf("http://%s:%d", config.IpAddress, config.TcpPort)
 	handler.client = influxdb2.NewClient(url, config.Token)
 	log.Info("InfluxDb client created for URL: ", url)
 	handler.config = *config

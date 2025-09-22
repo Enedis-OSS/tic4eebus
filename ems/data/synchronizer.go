@@ -223,7 +223,7 @@ func (s *DataSynchronizer) GeOverloadProtection() (overloadProtection OverloadPr
 
 func (s *DataSynchronizer) SetOverloadProtection(overloadprotection OverloadProtectionData) (hasChanged bool) {
 	s.access.Lock()
-	if !IsOverloadProtectionEqual(s.model.OverloadProtection, overloadprotection) {
+	if !cmp.Equal(s.model.OverloadProtection, overloadprotection) {
 		s.model.OverloadProtection = OverloadProtectionData(overloadprotection)
 		hasChanged = true
 	}

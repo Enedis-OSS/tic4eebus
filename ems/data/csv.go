@@ -29,7 +29,7 @@ const (
 )
 
 var (
-	titles = []string{
+	headers = []string{
 		"Timestamp",
 		"IsConnected",
 		"HasMeter",
@@ -164,7 +164,7 @@ func NewCsvWriter(config *config.CsvConfig) *CsvWriter {
 			if e.Type() != rotatelogs.FileRotatedEventType {
 				return
 			}
-			writeTitle((e.(*rotatelogs.FileRotatedEvent).CurrentFile()))
+			writeHeaders((e.(*rotatelogs.FileRotatedEvent).CurrentFile()))
 		})),
 	)
 	handler.logger.SetFormatter(&formatter{
@@ -186,14 +186,14 @@ func (h *CsvWriter) Save(model DataModel) {
 	h.logger.Info(message)
 }
 
-func writeTitle(fileName string) {
+func writeHeaders(fileName string) {
 	file, err := os.Create(fileName)
 	if err != nil {
 		log.Fatal(err)
 	}
 	writer := csv.NewWriter(file)
 	writer.Comma = column_separator
-	writer.Write(titles)
+	writer.Write(headers)
 	writer.Flush()
 	defer file.Close()
 }

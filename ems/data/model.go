@@ -41,29 +41,3 @@ type DataModel struct {
 	OverloadProtection OverloadProtectionData `json:"OverloadProtection"`
 	Diagnosis          DiagnosisData          `json:"Diagnosis"`
 }
-
-func IsOverloadProtectionEqual(overloadProtection OverloadProtectionData, other OverloadProtectionData) bool {
-	if overloadProtection.Active != other.Active {
-		return false
-	}
-	if overloadProtection.Value != other.Value {
-		return false
-	}
-	if overloadProtection.Start != other.Start {
-		return false
-	}
-	if overloadProtection.ResultCode != other.ResultCode {
-		return false
-	}
-	if overloadProtection.ResultDescription != other.ResultDescription {
-		return false
-	}
-	if overloadProtection.LockStart != other.LockStart {
-		return false
-	}
-	if overloadProtection.LockActive != other.LockActive {
-		return false
-	}
-
-	return true
-}
