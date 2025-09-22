@@ -182,7 +182,7 @@ func (s *DataSynchronizer) SetWallbox(wallbox map[string]interface{}) (hasChange
 	return hasChanged
 }
 
-func (s *DataSynchronizer) GeMeter() (meter linkymeter.MeterData) {
+func (s *DataSynchronizer) GetMeter() (meter linkymeter.MeterData) {
 	s.access.Lock()
 	meter = linkymeter.MeterData(s.model.Meter)
 	s.access.Unlock()
@@ -205,7 +205,7 @@ func (s *DataSynchronizer) SetMeter(meter linkymeter.MeterData) (hasChanged bool
 	return hasChanged
 }
 
-func (s *DataSynchronizer) GeMeterMinAvailableCurrent() (minAvailableCurrent float64) {
+func (s *DataSynchronizer) GetMeterMinAvailableCurrent() (minAvailableCurrent float64) {
 	s.access.Lock()
 	minAvailableCurrent = slices.Min(s.model.Meter.AvailableCurrentPerPhase)
 	s.access.Unlock()
@@ -213,7 +213,7 @@ func (s *DataSynchronizer) GeMeterMinAvailableCurrent() (minAvailableCurrent flo
 	return minAvailableCurrent
 }
 
-func (s *DataSynchronizer) GeOverloadProtection() (overloadProtection OverloadProtectionData) {
+func (s *DataSynchronizer) GetOverloadProtection() (overloadProtection OverloadProtectionData) {
 	s.access.Lock()
 	overloadProtection = OverloadProtectionData(s.model.OverloadProtection)
 	s.access.Unlock()
@@ -379,8 +379,8 @@ func (s *DataSynchronizer) GetModel() (model DataModel) {
 		HasOPEV:            s.HasOPEV(),
 		Vehicle:            s.GetVehicle(),
 		Wallbox:            s.GetWallbox(),
-		Meter:              s.GeMeter(),
-		OverloadProtection: s.GeOverloadProtection(),
+		Meter:              s.GetMeter(),
+		OverloadProtection: s.GetOverloadProtection(),
 		Diagnosis:          s.GetDiagnosis(),
 	}
 

@@ -358,7 +358,7 @@ func (e *EnergyGuard) runOverloadProtection() {
 				log.Info("OverloadProtection : safety delay is over")
 				e.data.SetOverloadProtectionLockActive(false)
 				// Get minimum available current
-				minAvailableCurrent := e.data.GeMeterMinAvailableCurrent()
+				minAvailableCurrent := e.data.GetMeterMinAvailableCurrent()
 				// Overload occurs ?
 				if minAvailableCurrent < 0.0 {
 					log.Infof("OverloadProtection : decrease current limit from %f A", math.Abs(minAvailableCurrent))
