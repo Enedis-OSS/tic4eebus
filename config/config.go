@@ -31,6 +31,14 @@ type CsvConfig struct {
 	Rotation FileRotationConfig
 }
 
+type InfluxDbConfig struct {
+	Bucket    string
+	Org       string
+	Token     string
+	IpAddress string
+	TcpPort   int
+}
+
 type TIC2WebsocketConfig struct {
 	IPAddress string
 	TCPPort   int
@@ -63,7 +71,8 @@ type LogConfig struct {
 }
 
 type DataModelConfig struct {
-	Csv CsvConfig
+	Csv      *CsvConfig
+	InfluxDb *InfluxDbConfig
 }
 
 type TeleInformationClientConfig struct {
@@ -100,7 +109,7 @@ const (
 
 func LoadConfig(configFilePath string) (Config, error) {
 	var config Config
-	configMap := make(map[interface{}]interface{})
+	configMap := make(map[any]any)
 	data, err := os.ReadFile(configFilePath)
 	if err != nil {
 		return config, fmt.Errorf("error reading YAML file: %v", err)
@@ -118,11 +127,15 @@ func LoadConfig(configFilePath string) (Config, error) {
 	if err != nil {
 		return config, err
 	}
-	config.Vehicle.UpdateDataPeriodInSeconds, config.Vehicle.DataPersistent, err = loadVehicle(configMap)
+	config.Vehicle.UpdateDataPeriodInSeconds,
+		config.Vehicle.DataPersistent,
+		err = loadVehicle(configMap)
 	if err != nil {
 		return config, err
 	}
-	config.Wallbox.UpdateDataPeriodInSeconds, config.Wallbox.DataPersistent, err = loadWallbox(configMap)
+	config.Wallbox.UpdateDataPeriodInSeconds,
+		config.Wallbox.DataPersistent,
+		err = loadWallbox(configMap)
 	if err != nil {
 		return config, err
 	}
@@ -135,10 +148,8 @@ func LoadConfig(configFilePath string) (Config, error) {
 	if err != nil {
 		return config, err
 	}
-	config.DataModel.Csv.FilePath,
-		config.DataModel.Csv.Rotation.PeriodInHours,
-		config.DataModel.Csv.Rotation.PeriodCount,
-		config.DataModel.Csv.Rotation.PeriodPattern,
+	config.DataModel.Csv,
+		config.DataModel.InfluxDb,
 		err = loadDataModel(configMap)
 	if err != nil {
 		return config, err
@@ -179,7 +190,7 @@ func DumpConfig(config Config) (string, error) {
 
 func loadOverloadProtection(configMap map[interface{}]interface{}) (enable bool, runningPeriodInSeconds int, valueInAmps float64, lockDelayInSeconds float64, err error) {
 	paramParentName, paramName := "", "OverloadProtection"
-	overloadProtectionMap, err := loadParameterAsMap(configMap, paramParentName, paramName)
+	overloadProtectionMap, err := loadParameterAsMap(configMap, paramParentName, paramName, true)
 	if err != nil {
 		return false, 0, 0.0, 0.0, err
 	}
@@ -193,7 +204,7 @@ func loadOverloadProtection(configMap map[interface{}]interface{}) (enable bool,
 		return enable, runningPeriodInSeconds, 0.0, 0.0, err
 	}
 	paramName = "CurrentLimit"
-	currentLimitMap, err := loadParameterAsMap(overloadProtectionMap, paramParentName, paramName)
+	currentLimitMap, err := loadParameterAsMap(overloadProtectionMap, paramParentName, paramName, true)
 	if err != nil {
 		return enable, runningPeriodInSeconds, 0.0, 0.0, err
 	}
@@ -209,7 +220,7 @@ func loadOverloadProtection(configMap map[interface{}]interface{}) (enable bool,
 
 func loadVehicle(configMap map[interface{}]interface{}) (updateDataPeriodInSeconds int, dataPersistent bool, err error) {
 	paramParentName, paramName := "", "Vehicle"
-	vehicleMap, err := loadParameterAsMap(configMap, paramParentName, paramName)
+	vehicleMap, err := loadParameterAsMap(configMap, paramParentName, paramName, true)
 	if err != nil {
 		return 0, false, err
 	}
@@ -225,7 +236,7 @@ func loadVehicle(configMap map[interface{}]interface{}) (updateDataPeriodInSecon
 
 func loadWallbox(configMap map[interface{}]interface{}) (updateDataPeriodInSeconds int, dataPersistent bool, err error) {
 	paramParentName, paramName := "", "Wallbox"
-	wallboxMap, err := loadParameterAsMap(configMap, paramParentName, paramName)
+	wallboxMap, err := loadParameterAsMap(configMap, paramParentName, paramName, true)
 	if err != nil {
 		return 0, false, err
 	}
@@ -241,7 +252,7 @@ func loadWallbox(configMap map[interface{}]interface{}) (updateDataPeriodInSecon
 
 func loadLog(configMap map[interface{}]interface{}) (level log.Level, filePath string, periodInHours int, periodCount int, periodPattern string, err error) {
 	paramParentName, paramName := "", "Log"
-	logMap, err := loadParameterAsMap(configMap, paramParentName, paramName)
+	logMap, err := loadParameterAsMap(configMap, paramParentName, paramName, true)
 	if err != nil {
 		return 0, "", 0, 0, "", err
 	}
@@ -262,38 +273,72 @@ func loadLog(configMap map[interface{}]interface{}) (level log.Level, filePath s
 	return level, filePath, periodInHours, periodCount, periodPattern, err
 }
 
-func loadDataModel(configMap map[interface{}]interface{}) (filePath string, periodInHours int, periodCount int, periodPattern string, err error) {
+func loadDataModel(configMap map[interface{}]interface{}) (csvConfig *CsvConfig, influxDbConfig *InfluxDbConfig, err error) {
 	paramParentName, paramName := "", "DataModel"
-	dataModelMap, err := loadParameterAsMap(configMap, "", "DataModel")
+	dataModelMap, err := loadParameterAsMap(configMap, "", "DataModel", true)
 	if err != nil {
-		return "", 0, 0, "", err
+		return nil, nil, err
 	}
 	paramParentName = paramName
-	csvMap, err := loadParameterAsMap(dataModelMap, paramParentName, "Csv")
+	paramName = "Csv"
+	csvMap, err := loadParameterAsMap(dataModelMap, paramParentName, paramName, false)
 	if err != nil {
-		return "", 0, 0, "", err
+		return nil, nil, err
 	}
-	paramParentName = paramParentName + "." + paramName
-	filePath, err = loadParameterAsString(csvMap, paramParentName, "FilePath", true)
-	if err != nil {
-		return "", 0, 0, "", err
+	if csvMap != nil {
+		paramParentName = paramParentName + "." + paramName
+		filePath, err := loadParameterAsString(csvMap, paramParentName, "FilePath", true)
+		if err != nil {
+			return nil, nil, err
+		}
+		periodInHours, periodCount, periodPattern, err := loadParameterAsFileRotationMap(csvMap, paramParentName, "Rotation")
+		if err != nil {
+			return nil, nil, err
+		}
+		csvConfig = &CsvConfig{filePath, FileRotationConfig{periodInHours, periodCount, periodPattern}}
 	}
-	periodInHours, periodCount, periodPattern, err = loadParameterAsFileRotationMap(csvMap, paramParentName, "Rotation")
+	paramParentName = "DataModel"
+	paramName = "InfluxDb"
+	influxDbMap, err := loadParameterAsMap(dataModelMap, paramParentName, paramName, false)
 	if err != nil {
-		return "", 0, 0, "", err
+		return nil, nil, err
+	}
+	if len(influxDbMap) > 0 {
+		paramParentName = paramParentName + "." + paramName
+		bucket, err := loadParameterAsString(influxDbMap, paramParentName, "Bucket", true)
+		if err != nil {
+			return nil, nil, err
+		}
+		org, err := loadParameterAsString(influxDbMap, paramParentName, "Org", true)
+		if err != nil {
+			return nil, nil, err
+		}
+		token, err := loadParameterAsString(influxDbMap, paramParentName, "Token", true)
+		if err != nil {
+			return nil, nil, err
+		}
+		ipAddress, err := loadParameterAsString(influxDbMap, paramParentName, "IpAddress", true)
+		if err != nil {
+			return nil, nil, err
+		}
+		tcpPort, err := loadParameterAsInt(influxDbMap, paramParentName, "TcpPort", true, 1, true, 65535)
+		if err != nil {
+			return nil, nil, err
+		}
+		influxDbConfig = &InfluxDbConfig{bucket, org, token, ipAddress, tcpPort}
 	}
 
-	return filePath, periodInHours, periodCount, periodPattern, err
+	return csvConfig, influxDbConfig, err
 }
 
 func loadTeleInformationClient(configMap map[interface{}]interface{}) (tic2WebsocketIPAddress string, tic2WebsocketTCPPort int, ticIdentifierSerialNumber string, err error) {
 	paramParentName, paramName := "", "TeleInformationClient"
-	teleInformationClientMap, err := loadParameterAsMap(configMap, paramParentName, paramName)
+	teleInformationClientMap, err := loadParameterAsMap(configMap, paramParentName, paramName, true)
 	if err != nil {
 		return "", 0, "", err
 	}
 	paramParentName = paramName
-	tic2WebsocketMap, err := loadParameterAsMap(teleInformationClientMap, paramParentName, "TIC2Websocket")
+	tic2WebsocketMap, err := loadParameterAsMap(teleInformationClientMap, paramParentName, "TIC2Websocket", true)
 	if err != nil {
 		return "", 0, "", err
 	}
@@ -306,7 +351,7 @@ func loadTeleInformationClient(configMap map[interface{}]interface{}) (tic2Webso
 	if err != nil {
 		return tic2WebsocketIPAddress, 0, "", err
 	}
-	ticIdentifierMap, err := loadParameterAsMap(teleInformationClientMap, paramName, "TICIdentifier")
+	ticIdentifierMap, err := loadParameterAsMap(teleInformationClientMap, paramName, "TICIdentifier", true)
 	if err != nil {
 		return tic2WebsocketIPAddress, tic2WebsocketTCPPort, "", err
 	}
@@ -327,7 +372,7 @@ func loadEEBUS(configMap map[interface{}]interface{}) (serverPort int,
 	err error) {
 
 	paramParentName, paramName := "", "EEBUS"
-	eebusMap, err := loadParameterAsMap(configMap, paramParentName, paramName)
+	eebusMap, err := loadParameterAsMap(configMap, paramParentName, paramName, true)
 	if err != nil {
 		return 0, "", "", "", "", "", "", "", 0, err
 	}
@@ -372,16 +417,24 @@ func loadEEBUS(configMap map[interface{}]interface{}) (serverPort int,
 	return serverPort, remoteSKI, certificateFilePath, privateKeyFilePath, vendorCode, deviceBrand, deviceModel, serialNumber, heartbeatTimeoutInSeconds, nil
 }
 
-func loadParameterAsMap(parameterMap map[interface{}]interface{}, paramParentName string, paramName string) (map[interface{}]interface{}, error) {
+func loadParameterAsMap(parameterMap map[interface{}]interface{}, paramParentName string, paramName string, mandatory bool) (map[interface{}]interface{}, error) {
 	parameter, ok := parameterMap[paramName]
 	if !ok {
-		if len(paramParentName) == 0 {
-			return nil, fmt.Errorf("%s: %s not found", INVALID_PARAMETER, paramName)
+		if mandatory {
+			if len(paramParentName) == 0 {
+				return nil, fmt.Errorf("%s: %s not found", INVALID_PARAMETER, paramName)
+			} else {
+				return nil, fmt.Errorf("%s: %s.%s not found", INVALID_PARAMETER, paramParentName, paramName)
+			}
 		} else {
-			return nil, fmt.Errorf("%s: %s.%s not found", INVALID_PARAMETER, paramParentName, paramName)
+			return nil, nil
 		}
 	}
-	parameterValue, ok := parameter.(map[interface{}]interface{})
+	parameterValue, ok := parameter.(map[any]any)
+	if parameterValue == nil {
+		return nil, nil
+	}
+
 	if !ok {
 		return nil, fmt.Errorf("%s: %s.%s is not a map (%v)", INVALID_PARAMETER, paramParentName, paramName, reflect.TypeOf(parameter))
 	}
@@ -407,7 +460,7 @@ func loadParameterAsExistingFilePath(parameterMap map[interface{}]interface{}, p
 }
 
 func loadParameterAsFileRotationMap(parentMap map[interface{}]interface{}, paramParentName string, paramName string) (periodInHours int, periodCount int, periodPattern string, err error) {
-	rotationMap, err := loadParameterAsMap(parentMap, paramParentName, paramName)
+	rotationMap, err := loadParameterAsMap(parentMap, paramParentName, paramName, true)
 	if err != nil {
 		return 0, 0, "", err
 	}

@@ -2,12 +2,19 @@
   ~ Copyright (C) 2025 Enedis Smarties team <dt-dsi-nexus-lab-smarties@enedis.fr>
   ~ 
   ~ SPDX-FileContributor: Jehan BOUSCH
+  ~ SPDX-FileContributor: Mathieu SABARTHES
   ~ 
   ~ SPDX-License-Identifier: Apache-2.0
 -->
 # Changelog
 
 [🇫🇷 Français](CHANGELOG.fr.md) | [🇺🇸 English](CHANGELOG.md)
+
+## [v1.1.0](https://github.com/Enedis-OSS/tic4eebus/tree/v1.1.0)
+### ✨ New features:
+* Write data model to InfluxDB for Grafana visualization
+### 🔧 Technical enhancements:
+* Optional configuration for data model (CSV file, InfluxDB)
 
 ## [v1.0.0](https://github.com/Enedis-OSS/tic4eebus/tree/v1.0.0)
 ### ✨ New features:
