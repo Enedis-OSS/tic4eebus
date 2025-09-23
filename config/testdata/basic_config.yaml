@@ -39,8 +39,8 @@ TeleInformationClient:
 EEBUS:
   ServerPort: 4817
   RemoteSKI: "0123456789abcdef01234567890abcdef0123456"
-  CertificateFilePath: "testdata/energy-guard.cert"
-  PrivateKeyFilePath: "testdata/energy-guard.key"
+  CertificateFilePath: "../examples/energy-guard.cert"
+  PrivateKeyFilePath: "../examples/energy-guard.key"
   VendorCode: "i:12345"
   DeviceBrand: "Enedis"
   DeviceModel: "PAC"
