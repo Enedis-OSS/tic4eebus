@@ -431,6 +431,10 @@ func loadParameterAsMap(parameterMap map[interface{}]interface{}, paramParentNam
 		}
 	}
 	parameterValue, ok := parameter.(map[any]any)
+	if parameterValue == nil {
+		return nil, nil
+	}
+
 	if !ok {
 		return nil, fmt.Errorf("%s: %s.%s is not a map (%v)", INVALID_PARAMETER, paramParentName, paramName, reflect.TypeOf(parameter))
 	}

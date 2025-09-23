@@ -1,0 +1,48 @@
+OverloadProtection:
+  Enable: true
+  RunningPeriodInSeconds: 1
+  CurrentLimit:
+    ValueInAmps: 16.0
+    LockDelayInSeconds: 10.0
+Vehicle:
+  UpdateDataPeriodInSeconds: 5
+  DataPersistent: false
+Wallbox:
+  UpdateDataPeriodInSeconds: 5
+  DataPersistent: false
+Log:
+  Level: "trace"
+  FilePath: "var/log/tic4eebus.log"
+  Rotation:
+    PeriodInHours: 24
+    PeriodCount: 15
+    PeriodPattern: "-%Y-%m-%d"
+DataModel:
+  Csv:
+    FilePath: "testdata/EnergyGuardDataModel.csv"
+    Rotation:
+      PeriodInHours: 24
+      PeriodCount: 7
+      PeriodPattern: "-%Y-%m-%d"
+  InfluxDb:
+    Bucket : "demo-bucket"
+    Org : "demo-org"
+    Token : "He_nwgoqXu4XggIzaiUWFHALKnS5JskdTLzGlSYeJMNkjCD-pyR6Yc5Hvl8NWj5Qo5C80mLvuJAS1IuqOcq4GQZZ"
+    IpAddress : "127.0.0.1"
+    TcpPort : 8086
+TeleInformationClient:
+  TIC2Websocket:
+    IPAddress: "127.0.0.1"
+    TCPPort: 19584
+  TICIdentifier:
+    SerialNumber: ""
+EEBUS:
+  ServerPort: 4817
+  RemoteSKI: "0123456789abcdef01234567890abcdef0123456"
+  CertificateFilePath: "testdata/energy-guard.cert"
+  PrivateKeyFilePath: "testdata/energy-guard.key"
+  VendorCode: "i:12345"
+  DeviceBrand: "Enedis"
+  DeviceModel: "PAC"
+  SerialNumber: "12345678"
+  HeartbeatTimeoutInSeconds: 2
