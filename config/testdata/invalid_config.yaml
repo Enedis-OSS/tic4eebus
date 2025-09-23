@@ -1,0 +1,4 @@
+
+Log:
+  Level: "invalid_level"
+  FilePath: "/var/log/tic4eebus.log"

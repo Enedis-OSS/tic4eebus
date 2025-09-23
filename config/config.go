@@ -109,7 +109,7 @@ const (
 
 func LoadConfig(configFilePath string) (Config, error) {
 	var config Config
-	configMap := make(map[interface{}]interface{})
+	configMap := make(map[any]any)
 	data, err := os.ReadFile(configFilePath)
 	if err != nil {
 		return config, fmt.Errorf("error reading YAML file: %v", err)
@@ -127,11 +127,15 @@ func LoadConfig(configFilePath string) (Config, error) {
 	if err != nil {
 		return config, err
 	}
-	config.Vehicle.UpdateDataPeriodInSeconds, config.Vehicle.DataPersistent, err = loadVehicle(configMap)
+	config.Vehicle.UpdateDataPeriodInSeconds,
+		config.Vehicle.DataPersistent,
+		err = loadVehicle(configMap)
 	if err != nil {
 		return config, err
 	}
-	config.Wallbox.UpdateDataPeriodInSeconds, config.Wallbox.DataPersistent, err = loadWallbox(configMap)
+	config.Wallbox.UpdateDataPeriodInSeconds,
+		config.Wallbox.DataPersistent,
+		err = loadWallbox(configMap)
 	if err != nil {
 		return config, err
 	}
@@ -426,7 +430,11 @@ func loadParameterAsMap(parameterMap map[interface{}]interface{}, paramParentNam
 			return nil, nil
 		}
 	}
-	parameterValue, ok := parameter.(map[interface{}]interface{})
+	parameterValue, ok := parameter.(map[any]any)
+	if parameterValue == nil {
+		return nil, nil
+	}
+
 	if !ok {
 		return nil, fmt.Errorf("%s: %s.%s is not a map (%v)", INVALID_PARAMETER, paramParentName, paramName, reflect.TypeOf(parameter))
 	}
