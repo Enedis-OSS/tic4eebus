@@ -18,11 +18,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// InfluxDbWriter is the handler to write data to InfluxDB
 type InfluxDbWriter struct {
 	client influxdb2.Client
 	config config.InfluxDbConfig
 }
 
+// NewInfluxDbWriter creates a new InfluxDbWriter with the given configuration
 func NewInfluxDbWriter(config *config.InfluxDbConfig) *InfluxDbWriter {
 	if config == nil {
 		return nil
@@ -37,6 +39,7 @@ func NewInfluxDbWriter(config *config.InfluxDbConfig) *InfluxDbWriter {
 	return handler
 }
 
+// Save saves the given data model to InfluxDB
 func (h *InfluxDbWriter) Save(model DataModel) {
 	if h == nil {
 		return
@@ -113,8 +116,8 @@ func createPoint(model DataModel) (p *write.Point) {
 			"Meter_DateTime":              model.Meter.DateTime,
 			"Meter_BreakerOpened":         model.Meter.BreakerOpened,
 			"IsConnected":                 model.IsConnected,
-			"HasMeter":                    model.HasMeter,
-			"HasOPEV":                     model.HasOPEV,
+			"HasMeterData":                model.HasMeterData,
+			"IsOpevSupported":             model.IsOpevSupported,
 			"Diagnosis_LastErrorCode":     model.Diagnosis.LastErrorCode,
 			"Meter_OverLoadCurrentLimit1": overLoadCurrentLimit1,
 			"Meter_OverLoadCurrentLimit2": overLoadCurrentLimit2,

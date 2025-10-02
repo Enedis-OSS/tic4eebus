@@ -3,6 +3,15 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+/*
+Package data is used for manipulating energy management system data model.
+
+The data model can be synchronized with multiple data writers:
+
+  - CSV file
+
+  - InfluxDB database
+*/
 package data
 
 import (
@@ -18,10 +27,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Interface for data writers
 type DataWriter interface {
 	Save(model DataModel)
 }
 
+// DataSynchronizer is used to synchronize the data model and save it with multiple data writers
 type DataSynchronizer struct {
 	model                DataModel
 	deviceDiagnosisState model.DeviceDiagnosisStateDataType
@@ -29,12 +40,13 @@ type DataSynchronizer struct {
 	writers              []DataWriter
 }
 
+// NewDataSynchronizer creates a an instance of DataSynchronizer from data model configuration
 func NewDataSynchronizer(dataModelConfig config.DataModelConfig) *DataSynchronizer {
 	synchronizer := &DataSynchronizer{}
 
 	synchronizer.model.IsConnected = false
-	synchronizer.model.HasMeter = false
-	synchronizer.model.HasMeter = false
+	synchronizer.model.HasMeterData = false
+	synchronizer.model.IsOpevSupported = false
 	synchronizer.model.Vehicle = make(map[string]interface{})
 	synchronizer.model.Wallbox = make(map[string]interface{})
 	synchronizer.model.Diagnosis.OperatingState = model.DeviceDiagnosisOperatingStateTypeNormalOperation
@@ -49,6 +61,7 @@ func NewDataSynchronizer(dataModelConfig config.DataModelConfig) *DataSynchroniz
 	return synchronizer
 }
 
+// IsConnected returns true if the EMS is connected to a wallbox
 func (s *DataSynchronizer) IsConnected() (isConnected bool) {
 	s.access.Lock()
 	isConnected = s.model.IsConnected
@@ -57,6 +70,9 @@ func (s *DataSynchronizer) IsConnected() (isConnected bool) {
 	return isConnected
 }
 
+// SetIsConnected sets the connection state of the EMS to a wallbox
+//
+// If the state has changed, it saves the data model with the data writers and returns true
 func (s *DataSynchronizer) SetIsConnected(isConnected bool) (hasChanged bool) {
 	s.access.Lock()
 	if isConnected != s.model.IsConnected {
@@ -71,18 +87,22 @@ func (s *DataSynchronizer) SetIsConnected(isConnected bool) (hasChanged bool) {
 	return hasChanged
 }
 
-func (s *DataSynchronizer) HasMeter() (hasMeter bool) {
+// HasMeterData returns true if the Linky meter sends data to the EMS
+func (s *DataSynchronizer) HasMeterData() (hasMeter bool) {
 	s.access.Lock()
-	hasMeter = s.model.HasMeter
+	hasMeter = s.model.HasMeterData
 	s.access.Unlock()
 
 	return hasMeter
 }
 
-func (s *DataSynchronizer) SetHasMeter(hasMeter bool) (hasChanged bool) {
+// SetHasMeterData sets the state if the Linky meter sends data to the EMS
+//
+// If the state has changed, it saves the data model with the data writers and returns true
+func (s *DataSynchronizer) SetHasMeterData(hasMeterData bool) (hasChanged bool) {
 	s.access.Lock()
-	if hasMeter != s.model.HasMeter {
-		s.model.HasMeter = hasMeter
+	if hasMeterData != s.model.HasMeterData {
+		s.model.HasMeterData = hasMeterData
 		hasChanged = true
 	}
 	s.access.Unlock()
@@ -93,18 +113,22 @@ func (s *DataSynchronizer) SetHasMeter(hasMeter bool) (hasChanged bool) {
 	return hasChanged
 }
 
-func (s *DataSynchronizer) HasOPEV() (hasOPEV bool) {
+// IsOpevSupported returns true if the EEBUS OPEV use case is supported by the wallbox
+func (s *DataSynchronizer) IsOpevSupported() (isOpevSupported bool) {
 	s.access.Lock()
-	hasOPEV = s.model.HasOPEV
+	isOpevSupported = s.model.IsOpevSupported
 	s.access.Unlock()
 
-	return hasOPEV
+	return isOpevSupported
 }
 
-func (s *DataSynchronizer) SetHasOPEV(hasOPEV bool) (hasChanged bool) {
+// SetIsOpevSupported sets the state if the EEBUS OPEV use case is supported by the wallbox
+//
+// If the state has changed, it saves the data model with the data writers and returns true
+func (s *DataSynchronizer) SetIsOpevSupported(isOpevSupported bool) (hasChanged bool) {
 	s.access.Lock()
-	if hasOPEV != s.model.HasOPEV {
-		s.model.HasOPEV = hasOPEV
+	if isOpevSupported != s.model.IsOpevSupported {
+		s.model.IsOpevSupported = isOpevSupported
 		hasChanged = true
 	}
 	s.access.Unlock()
@@ -115,6 +139,7 @@ func (s *DataSynchronizer) SetHasOPEV(hasOPEV bool) (hasChanged bool) {
 	return hasChanged
 }
 
+// GetVehicle returns a copy of the vehicle data map
 func (s *DataSynchronizer) GetVehicle() (vehicle map[string]interface{}) {
 	vehicle = make(map[string]interface{})
 	s.access.Lock()
@@ -126,6 +151,9 @@ func (s *DataSynchronizer) GetVehicle() (vehicle map[string]interface{}) {
 	return vehicle
 }
 
+// SetVehicle updates the vehicle data map with the provided data
+//
+// If the data has changed, it saves the data model with the data writers and returns true
 func (s *DataSynchronizer) SetVehicle(vehicle map[string]interface{}) (hasChanged bool) {
 	s.access.Lock()
 	// compare and update vehicle data
@@ -149,6 +177,7 @@ func (s *DataSynchronizer) SetVehicle(vehicle map[string]interface{}) (hasChange
 	return hasChanged
 }
 
+// GetWallbox returns a copy of the wallbox data map
 func (s *DataSynchronizer) GetWallbox() (wallbox map[string]interface{}) {
 	wallbox = make(map[string]interface{})
 	s.access.Lock()
@@ -160,6 +189,9 @@ func (s *DataSynchronizer) GetWallbox() (wallbox map[string]interface{}) {
 	return wallbox
 }
 
+// SetWallbox updates the wallbox data map with the provided data
+//
+// If the data has changed, it saves the data model with the data writers and returns true
 func (s *DataSynchronizer) SetWallbox(wallbox map[string]interface{}) (hasChanged bool) {
 	s.access.Lock()
 	for k, v := range wallbox {
@@ -182,6 +214,7 @@ func (s *DataSynchronizer) SetWallbox(wallbox map[string]interface{}) (hasChange
 	return hasChanged
 }
 
+// GetMeter returns a copy of the Linky meter data
 func (s *DataSynchronizer) GetMeter() (meter linkymeter.MeterData) {
 	s.access.Lock()
 	meter = linkymeter.MeterData(s.model.Meter)
@@ -190,11 +223,14 @@ func (s *DataSynchronizer) GetMeter() (meter linkymeter.MeterData) {
 	return meter
 }
 
+// SetMeter updates the Linky meter data with the provided data
+//
+// If the data has changed, it saves the data model with the data writers and returns true
 func (s *DataSynchronizer) SetMeter(meter linkymeter.MeterData) (hasChanged bool) {
 	s.access.Lock()
 	if !linkymeter.IsEqual(s.model.Meter, meter) {
 		s.model.Meter = linkymeter.MeterData(meter)
-		s.model.HasMeter = true
+		s.model.HasMeterData = true
 		hasChanged = true
 	}
 	s.access.Unlock()
@@ -205,6 +241,7 @@ func (s *DataSynchronizer) SetMeter(meter linkymeter.MeterData) (hasChanged bool
 	return hasChanged
 }
 
+// GetMeterMinAvailableCurrent returns the minimum available current from the Linky meter data
 func (s *DataSynchronizer) GetMeterMinAvailableCurrent() (minAvailableCurrent float64) {
 	s.access.Lock()
 	minAvailableCurrent = slices.Min(s.model.Meter.AvailableCurrentPerPhase)
@@ -213,6 +250,7 @@ func (s *DataSynchronizer) GetMeterMinAvailableCurrent() (minAvailableCurrent fl
 	return minAvailableCurrent
 }
 
+// GetOverloadProtection returns a copy of the overload protection data
 func (s *DataSynchronizer) GetOverloadProtection() (overloadProtection OverloadProtectionData) {
 	s.access.Lock()
 	overloadProtection = OverloadProtectionData(s.model.OverloadProtection)
@@ -221,23 +259,12 @@ func (s *DataSynchronizer) GetOverloadProtection() (overloadProtection OverloadP
 	return overloadProtection
 }
 
-func (s *DataSynchronizer) SetOverloadProtection(overloadprotection OverloadProtectionData) (hasChanged bool) {
-	s.access.Lock()
-	if !cmp.Equal(s.model.OverloadProtection, overloadprotection) {
-		s.model.OverloadProtection = OverloadProtectionData(overloadprotection)
-		hasChanged = true
-	}
-	s.access.Unlock()
-	if hasChanged {
-		s.save()
-	}
-
-	return hasChanged
-}
+// GetDiagnosisState returns a pointer to the device diagnosis state data
 func (s *DataSynchronizer) GetDiagnosisState() *model.DeviceDiagnosisStateDataType {
 	return &s.deviceDiagnosisState
 }
 
+// GetDiagnosis returns a copy of the diagnosis data
 func (e *DataSynchronizer) GetDiagnosis() (diagnosis DiagnosisData) {
 	e.access.Lock()
 	diagnosis = e.model.Diagnosis
@@ -246,6 +273,9 @@ func (e *DataSynchronizer) GetDiagnosis() (diagnosis DiagnosisData) {
 	return diagnosis
 }
 
+// SetDiagnosis updates the diagnosis data with the provided data
+//
+// If the data has changed, it saves the data model with the data writers and returns true
 func (s *DataSynchronizer) SetDiagnosis(operatingState model.DeviceDiagnosisOperatingStateType, lastErrorCode model.LastErrorCodeType) (hasChanged bool) {
 	s.access.Lock()
 	if lastErrorCode != s.model.Diagnosis.LastErrorCode {
@@ -261,6 +291,9 @@ func (s *DataSynchronizer) SetDiagnosis(operatingState model.DeviceDiagnosisOper
 	return hasChanged
 }
 
+// DisableOverloadProtectionActive disables the overload protection active state
+//
+// If the state has changed, it saves the data model with the data writers
 func (s *DataSynchronizer) DisableOverloadProtectionActive() {
 	s.access.Lock()
 	if s.model.OverloadProtection.Active {
@@ -273,6 +306,7 @@ func (s *DataSynchronizer) DisableOverloadProtectionActive() {
 	s.access.Unlock()
 }
 
+// GetOverloadProtectionValue returns the overload protection value
 func (s *DataSynchronizer) GetOverloadProtectionValue() (limitValue float64) {
 	s.access.Lock()
 	limitValue = s.model.OverloadProtection.Value
@@ -281,6 +315,9 @@ func (s *DataSynchronizer) GetOverloadProtectionValue() (limitValue float64) {
 	return limitValue
 }
 
+// SetOverloadProtectionValue sets the overload protection value and activates the overload protection
+//
+// It saves the data model with the data writers
 func (s *DataSynchronizer) SetOverloadProtectionValue(limitValue float64) {
 	s.access.Lock()
 	s.model.OverloadProtection.Value = limitValue
@@ -290,6 +327,7 @@ func (s *DataSynchronizer) SetOverloadProtectionValue(limitValue float64) {
 	s.save()
 }
 
+// GetOverloadProtectionResult returns the overload protection result code and description
 func (s *DataSynchronizer) SetOverloadProtectionResult(result model.ResultDataType) (hasChanged bool) {
 	s.access.Lock()
 	if result.ErrorNumber != nil {
@@ -326,6 +364,7 @@ func (s *DataSynchronizer) SetOverloadProtectionResult(result model.ResultDataTy
 	return hasChanged
 }
 
+// GetOverloadProtectionLockStart returns the overload protection lock start time
 func (s *DataSynchronizer) GetOverloadProtectionLockStart() (lockStart time.Time) {
 	s.access.Lock()
 	lockStart = s.model.OverloadProtection.LockStart
@@ -334,6 +373,9 @@ func (s *DataSynchronizer) GetOverloadProtectionLockStart() (lockStart time.Time
 	return lockStart
 }
 
+// SetOverloadProtectionLockStart sets the overload protection lock start time and activates the lock
+//
+// If the lock start time has changed, it saves the data model with the data writers and returns true
 func (s *DataSynchronizer) SetOverloadProtectionLockStart(lockStart time.Time) (hasChanged bool) {
 	s.access.Lock()
 	if lockStart != s.model.OverloadProtection.Start {
@@ -349,6 +391,7 @@ func (s *DataSynchronizer) SetOverloadProtectionLockStart(lockStart time.Time) (
 	return hasChanged
 }
 
+// GetOverloadProtectionLockDuration returns the overload protection lock duration
 func (s *DataSynchronizer) GetOverloadProtectionLockDuration() (lockDuration time.Duration) {
 	now := time.Now()
 	s.access.Lock()
@@ -358,6 +401,9 @@ func (s *DataSynchronizer) GetOverloadProtectionLockDuration() (lockDuration tim
 	return lockDuration
 }
 
+// SetOverloadProtectionLockActive sets the overload protection lock active state
+//
+// If the state has changed, it saves the data model with the data writers and returns true
 func (s *DataSynchronizer) SetOverloadProtectionLockActive(lockActive bool) (hasChanged bool) {
 	s.access.Lock()
 	if lockActive != s.model.OverloadProtection.LockActive {
@@ -372,11 +418,12 @@ func (s *DataSynchronizer) SetOverloadProtectionLockActive(lockActive bool) (has
 	return hasChanged
 }
 
+// GetModel returns a copy of the data model
 func (s *DataSynchronizer) GetModel() (model DataModel) {
 	model = DataModel{
 		IsConnected:        s.IsConnected(),
-		HasMeter:           s.HasMeter(),
-		HasOPEV:            s.HasOPEV(),
+		HasMeterData:       s.HasMeterData(),
+		IsOpevSupported:    s.IsOpevSupported(),
 		Vehicle:            s.GetVehicle(),
 		Wallbox:            s.GetWallbox(),
 		Meter:              s.GetMeter(),
@@ -387,6 +434,7 @@ func (s *DataSynchronizer) GetModel() (model DataModel) {
 	return model
 }
 
+// Print prints the data model as a formatted JSON string
 func (s *DataSynchronizer) Print() {
 	model := s.GetModel()
 	jsonBytes, error := json.MarshalIndent(model, "", "  ")
@@ -395,6 +443,7 @@ func (s *DataSynchronizer) Print() {
 	}
 }
 
+// save saves the data model with the data writers
 func (e *DataSynchronizer) save() {
 	model := e.GetModel()
 	for _, writer := range e.writers {
