@@ -23,32 +23,42 @@ import (
 )
 
 const (
-	WALLBOX_USE_CASE_EVSECC = "EVSECC"
-	// EVSECC datas
-	WALLBOX_USE_CASE_SUPPORTED = "UseCaseSupported"
-	WALLBOX_IS_CONNECTED       = "IsConnected"
-	WALLBOX_OPERATING_STATE    = "OperatingState"
-	WALLBOX_MANUFACTURER_DATA  = "ManufacturerData"
+	wallbox_use_case_evsecc    = "EVSECC"
+	wallbox_use_case_supported = "UseCaseSupported"
 )
 
-type OnWallboxData func(wallboxData map[string]interface{})
-type OnWallboxConnected func()
-type OnWallboxDisconnected func()
-type OnWallboxSupported func()
+// EVSECC wallbox data key used for connection state (true/false)
+const WALLBOX_IS_CONNECTED = "IsConnected"
 
-type WallboxDataSubscriber struct {
-	onData         OnWallboxData
-	onConnected    OnWallboxConnected
-	onDisconnected OnWallboxDisconnected
-	onSupported    OnWallboxSupported
+// EVSECC wallbox data key used for operating state
+//
+// See also: https://pkg.go.dev/github.com/enbility/spine-go@v0.7.0/model#DeviceDiagnosisOperatingStateType
+const WALLBOX_OPERATING_STATE = "OperatingState"
+
+// EVSECC wallbox data key used for manufacturer data
+//
+// See also: https://pkg.go.dev/github.com/enbility/eebus-go@v0.7.0/api#ManufacturerData
+const WALLBOX_MANUFACTURER_DATA = "ManufacturerData"
+
+type onWallboxData func(wallboxData map[string]interface{})
+type onWallboxConnected func()
+type onWallboxDisconnected func()
+type onWallboxSupported func()
+
+type wallboxDataSubscriber struct {
+	onData         onWallboxData
+	onConnected    onWallboxConnected
+	onDisconnected onWallboxDisconnected
+	onSupported    onWallboxSupported
 }
 
+// Wallbox handle a wallbox and its data
 type Wallbox struct {
 	data             map[string]interface{}
 	dataAccess       sync.Mutex
 	config           config.WallboxConfig
 	subscriberAccess sync.Mutex
-	subscriberMap    map[string]WallboxDataSubscriber
+	subscriberMap    map[string]wallboxDataSubscriber
 	useCase          struct {
 		supported atomic.Bool
 		handler   *evsecc.EVSECC
@@ -59,6 +69,7 @@ type Wallbox struct {
 	job              *gocron.Job
 }
 
+// NewWallbox creates a new Wallbox instance
 func NewWallbox(
 	service api.ServiceInterface,
 	localEntity spineapi.EntityLocalInterface,
@@ -69,7 +80,7 @@ func NewWallbox(
 
 	wallbox.data = make(map[string]interface{})
 	wallbox.config = config
-	wallbox.subscriberMap = make(map[string]WallboxDataSubscriber)
+	wallbox.subscriberMap = make(map[string]wallboxDataSubscriber)
 
 	wallbox.useCase.handler = evsecc.NewEVSECC(localEntity, wallbox.onEvent_EVSECC)
 	wallbox.useCase.supported.Store(false)
@@ -82,16 +93,25 @@ func NewWallbox(
 	return wallbox
 }
 
+// EnableRemoteConnection enables the remote connection to the wallbox
+//
+// The remote connection is enable by the energy management system when the EEBUS connection is established.
+// When the remote connection is enabled, all datas available are read from the wallbox.
 func (w *Wallbox) EnableRemoteConnection() {
 	w.remoteConnection.Store(true)
 }
 
+// DisableRemoteConnection disables the remote connection to the wallbox
+//
+// The remote connection is disabled by the energy management system when the EEBUS connection is closed.
+// When the remote connection is disabled, no data are read from the wallbox.
 func (w *Wallbox) DisableRemoteConnection() {
 	w.remoteConnection.Store(false)
 }
 
-func (v *Wallbox) SubscribeData(onData OnWallboxData, onConnected OnWallboxConnected, onDisconnected OnWallboxDisconnected, onSupported OnWallboxSupported) (id string) {
-	subscriber := WallboxDataSubscriber{onData: onData, onConnected: onConnected, onDisconnected: onDisconnected, onSupported: onSupported}
+// SubscribeData subscribes to wallbox data updates, connection and disconnection events, use case supported notification and returns a subscription ID
+func (v *Wallbox) SubscribeData(onData onWallboxData, onConnected onWallboxConnected, onDisconnected onWallboxDisconnected, onSupported onWallboxSupported) (id string) {
+	subscriber := wallboxDataSubscriber{onData: onData, onConnected: onConnected, onDisconnected: onDisconnected, onSupported: onSupported}
 	id = uuid.New().String()
 	v.subscriberAccess.Lock()
 	v.subscriberMap[id] = subscriber
@@ -100,6 +120,7 @@ func (v *Wallbox) SubscribeData(onData OnWallboxData, onConnected OnWallboxConne
 	return id
 }
 
+// UnsubscribeData unsubscribes from wallbox data updates, connection and disconnection events, use case supported notification using the subscription ID
 func (v *Wallbox) UnsubscribeData(id string) error {
 	_, ok := v.subscriberMap[id]
 	if !ok {
@@ -157,6 +178,7 @@ func (w *Wallbox) reset() {
 	w.useCase.supported.Store(false)
 }
 
+// IsConnected returns true if the connection with the wallbox is established, false otherwise
 func (w *Wallbox) IsConnected() bool {
 	var isConnected bool
 
@@ -179,6 +201,7 @@ func (w *Wallbox) setIsConnected(isConnected bool) {
 	w.dataAccess.Unlock()
 }
 
+// GetData returns a copy of the wallbox data map
 func (w *Wallbox) GetData() map[string]interface{} {
 	data := make(map[string]interface{})
 
@@ -259,6 +282,7 @@ func (w *Wallbox) readAndSetOperatingState() (model.DeviceDiagnosisOperatingStat
 	return operatingState, error
 }
 
+// EVSECC Event Handler
 func (w *Wallbox) onEvent_EVSECC(ski string, device spineapi.DeviceRemoteInterface, entity spineapi.EntityRemoteInterface, event api.EventType) {
 	var dataName string
 	var data interface{}
@@ -267,14 +291,14 @@ func (w *Wallbox) onEvent_EVSECC(ski string, device spineapi.DeviceRemoteInterfa
 	if !w.remoteConnection.Load() {
 		return
 	}
-	useCaseName := WALLBOX_USE_CASE_EVSECC
+	useCaseName := wallbox_use_case_evsecc
 	error = nil
 	w.remoteEntity = entity
 
 	switch event {
 	case evsecc.UseCaseSupportUpdate:
 		w.useCase.supported.Store(true)
-		dataName = WALLBOX_USE_CASE_SUPPORTED
+		dataName = wallbox_use_case_supported
 		data = true
 		w.notifySupported()
 	case evsecc.EvseConnected:
