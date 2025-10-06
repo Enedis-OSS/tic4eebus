@@ -201,7 +201,7 @@ func NewVehicle(
 // EnableRemoteConnection enables the remote connection to the vehicle
 //
 // The remote connection is enable by the energy management system when the EEBUS connection with the wallbox is established.
-// When the remote connection is enabled, all datas available are read from the vehicle.
+// When the remote connection is enabled, all data available are read from the vehicle.
 func (v *Vehicle) EnableRemoteConnection() {
 	v.remoteConnection.Store(true)
 }
@@ -209,7 +209,7 @@ func (v *Vehicle) EnableRemoteConnection() {
 // DisableRemoteConnection disables the remote connection to the vehicle
 //
 // The remote connection is disabled by the energy management system when the EEBUS connection with the wallbox is closed.
-// When the remote connection is disabled, all datas are cleared (if not persistent) and no data is read from the vehicle.
+// When the remote connection is disabled, all data are cleared (if not persistent) and no data is read from the vehicle.
 func (v *Vehicle) DisableRemoteConnection() {
 	v.remoteConnection.Store(false)
 }

@@ -96,7 +96,7 @@ func NewWallbox(
 // EnableRemoteConnection enables the remote connection to the wallbox
 //
 // The remote connection is enable by the energy management system when the EEBUS connection is established.
-// When the remote connection is enabled, all datas available are read from the wallbox.
+// When the remote connection is enabled, all data available are read from the wallbox.
 func (w *Wallbox) EnableRemoteConnection() {
 	w.remoteConnection.Store(true)
 }

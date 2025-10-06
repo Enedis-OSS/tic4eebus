@@ -21,7 +21,7 @@ The flags are:
 		Show software version
 
 When tic4eebus starts, it connects to the Eebus wallbox and receive the Linky meter
-datas using TIC2WebSocket API periodically (from 1 to 3 seconds) using configurations parameters specified.
+data using TIC2WebSocket API periodically (from 1 to 3 seconds) using configurations parameters specified.
 According to the available energy, it decides to increase or decrease the charge of the electric vehicle.
 */
 package main
