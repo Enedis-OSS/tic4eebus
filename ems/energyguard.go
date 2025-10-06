@@ -78,7 +78,7 @@ type EnergyGuard struct {
 	tic2WebsocketAccess        sync.Mutex
 	tic2WebsocketSubcriptionId string
 	tic2WebsocketAvailableTic  linkymeter.TicIdentifier
-	tic2WebsocketClient        *linkymeter.TIC2WebsocketClient
+	tic2WebsocketClient        *linkymeter.Tic2WebsocketClient
 	scheduler                  *gocron.Scheduler
 	overloadProtectionJob      *gocron.Job
 	tic2WebsocketClientJob     *gocron.Job
@@ -611,7 +611,7 @@ func (e *EnergyGuard) updateDiagnosis(operatingState model.DeviceDiagnosisOperat
 
 func (e *EnergyGuard) createTic2WebsocketClient() {
 	e.Info("Creating TIC2Websocket client")
-	e.tic2WebsocketClient = linkymeter.NewTIC2WebsocketClient()
+	e.tic2WebsocketClient = linkymeter.NewTic2WebsocketClient()
 }
 
 // Logging interface for Trace level
