@@ -1,0 +1,10 @@
+# Default line ending
+* text=auto
+
+# Force LF for Go files
+*.go text eol=lf
+
+# Other common text files
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
