@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /*
-tic4eebus handle electrical vehicle charge according to available energy provided by the Linky meter.
+tic4eebus handles electrical vehicle charge according to available energy provided by the Linky meter.
 It uses a configuration file to change application behaviour.
 
 Usage:

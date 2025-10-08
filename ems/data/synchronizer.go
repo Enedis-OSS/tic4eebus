@@ -40,7 +40,7 @@ type DataSynchronizer struct {
 	writers              []DataWriter
 }
 
-// NewDataSynchronizer creates a an instance of DataSynchronizer from data model configuration
+// NewDataSynchronizer creates an instance of DataSynchronizer from data model configuration
 func NewDataSynchronizer(dataModelConfig config.DataModelConfig) *DataSynchronizer {
 	synchronizer := &DataSynchronizer{}
 
@@ -88,12 +88,12 @@ func (s *DataSynchronizer) SetIsConnected(isConnected bool) (hasChanged bool) {
 }
 
 // HasMeterData returns true if the Linky meter sends data to the EMS
-func (s *DataSynchronizer) HasMeterData() (hasMeter bool) {
+func (s *DataSynchronizer) HasMeterData() (hasMeterData bool) {
 	s.access.Lock()
-	hasMeter = s.model.HasMeterData
+	hasMeterData = s.model.HasMeterData
 	s.access.Unlock()
 
-	return hasMeter
+	return hasMeterData
 }
 
 // SetHasMeterData sets the state if the Linky meter sends data to the EMS
@@ -362,15 +362,6 @@ func (s *DataSynchronizer) SetOverloadProtectionResult(result model.ResultDataTy
 	}
 
 	return hasChanged
-}
-
-// GetOverloadProtectionLockStart returns the overload protection lock start time
-func (s *DataSynchronizer) GetOverloadProtectionLockStart() (lockStart time.Time) {
-	s.access.Lock()
-	lockStart = s.model.OverloadProtection.LockStart
-	s.access.Unlock()
-
-	return lockStart
 }
 
 // SetOverloadProtectionLockStart sets the overload protection lock start time and activates the lock
