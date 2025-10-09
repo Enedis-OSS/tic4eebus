@@ -25,14 +25,14 @@ Log:
     PeriodPattern: "-%Y-%m-%d"
 DataModel:
 TeleInformationClient:
-  TIC2Websocket:
-    IPAddress: "127.0.0.1"
-    TCPPort: 19584
-  TICIdentifier:
+  Tic2Websocket:
+    IpAddress: "127.0.0.1"
+    TcpPort: 19584
+  TicIdentifier:
     SerialNumber: ""
-EEBUS:
+Eebus:
   ServerPort: 4817
-  RemoteSKI: "0123456789abcdef01234567890abcdef0123456"
+  RemoteSki: "0123456789abcdef01234567890abcdef0123456"
   CertificateFilePath: "../examples/energy-guard.cert"
   PrivateKeyFilePath: "../examples/energy-guard.key"
   VendorCode: "i:12345"

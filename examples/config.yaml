@@ -51,16 +51,16 @@ DataModel:
 
 # Tele information client (TIC) configuration
 TeleInformationClient:
-  TIC2Websocket:
-    IPAddress : "127.0.0.1"
-    TCPPort : 19584
-  TICIdentifier:
+  Tic2Websocket:
+    IpAddress : "127.0.0.1"
+    TcpPort : 19584
+  TicIdentifier:
     SerialNumber : "" # Meter serial number should only be specified if TIC2Websocket handles multiple modems
 
 # EEBUS configuration
-EEBUS:
+Eebus:
   ServerPort : 4817
-  RemoteSKI : "${TIC4EEBUS_REMOTE_SKI}" # Example: "50abfe7714d034b8b15e488b91831047657b9ff2"
+  RemoteSki : "${TIC4EEBUS_REMOTE_SKI}" # Example: "50abfe7714d034b8b15e488b91831047657b9ff2"
   CertificateFilePath : "examples/energy-guard.cert"
   PrivateKeyFilePath : "examples/energy-guard.key"
   VendorCode : "i:54076"

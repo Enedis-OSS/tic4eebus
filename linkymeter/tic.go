@@ -3,6 +3,15 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+/*
+Package linkymeter implements utility routines for receiving and computing Linky meter data needed by the energy management system.
+
+The reception of Linky meter data is done through a TIC2WebSocket client.
+This client receives data periodically (from 1 to 3 seconds) and a routine used by the energy management system computes data to be stored in the data model.
+Those data are then used by the energy management system to decide the electrical vehicle charge power to be sent to the wallbox.
+
+See [MeterData] for the data provided by the Linky meter.
+*/
 package linkymeter
 
 import (
@@ -21,72 +30,100 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var ErrTIC2WebsocketNotConnected = errors.New("tic2websocket not connected")
-var ErrTIC2WebsocketAlreadyConnected = errors.New("tic2websocket already connected")
+var errTic2WebsocketNotConnected = errors.New("tic2websocket not connected")
+var errTic2WebsocketAlreadyConnected = errors.New("tic2websocket already connected")
 
-type OnTICData func(ticData TICData)
-type OnTICError func(ticError TICError)
-type OnTICAbnormalClosure func()
+// Callback function used to notify new data received from the TIC2WebSocket client
+type OnTicData func(ticData TicData)
 
-type TICEventSubscriber struct {
-	onData            OnTICData
-	onError           OnTICError
-	onAbnormalClosure OnTICAbnormalClosure
+// Callback function used to notify an error received from the TIC2WebSocket client
+type OnTicError func(ticError TicError)
+
+// Callback function used to notify an abnormal closure of the TIC2WebSocket client
+type OnTicAbnormalClosure func()
+
+type ticEventSubscriber struct {
+	onData            OnTicData
+	onError           OnTicError
+	onAbnormalClosure OnTicAbnormalClosure
 }
 
-type TICSubsciberMapEntry struct {
-	ticIdentifier   TICIdentifier
-	eventSubscriber TICEventSubscriber
+type ticSubsciberMapEntry struct {
+	ticIdentifier   TicIdentifier
+	eventSubscriber ticEventSubscriber
 }
 
-type TIC2WebsocketClient struct {
+// Tic2WebsocketClient handle the connection to the TIC2WebSocket server
+type Tic2WebsocketClient struct {
 	url                     url.URL
 	connection              *websocket.Conn
 	connected               atomic.Bool
 	subscriberLock          sync.Mutex
-	subscriberMap           map[string]TICSubsciberMapEntry
+	subscriberMap           map[string]ticSubsciberMapEntry
 	readMessagesRunning     atomic.Bool
 	stopReadMessagesChannel chan bool
-	responseChannel         chan TIC2WebsocketResponse
+	responseChannel         chan tic2WebsocketResponse
 }
 
-type TICIdentifier struct {
+// TicIdentifier identifies a TIC to be read or subscribed
+type TicIdentifier struct {
+	// TIC serial number (if empty, the first available TIC is used)
 	SerialNumber string `json:"serialNumber,omitempty"`
-	PortName     string `json:"portName,omitempty"`
-	PortId       string `json:"portId,omitempty"`
+	// TIC port name (if empty, the first available TIC is used)
+	PortName string `json:"portName,omitempty"`
+	// TIC port ID (if empty, the first available TIC is used)
+	PortId string `json:"portId,omitempty"`
 }
 
+// ModemInfo represents the TIC modem information
 type ModemInfo struct {
-	PortName         string `json:"portName"`
-	ModemType        string `json:"modemType,omitempty"`
-	ProductId        int    `json:"productId,omitempty"`
-	VendorId         int    `json:"vendorId,omitempty"`
-	ProductName      string `json:"productName,omitempty"`
+	// TIC serial port name
+	PortName string `json:"portName"`
+	// TIC modem type (e.g. "MICHAUD", "TELEINFO" for USB modems)
+	ModemType string `json:"modemType,omitempty"`
+	// TIC modem USB product ID
+	ProductId int `json:"productId,omitempty"`
+	// TIC modem USB vendor ID
+	VendorId int `json:"vendorId,omitempty"`
+	// TIC modem USB product name
+	ProductName string `json:"productName,omitempty"`
+	// TIC modem USB manufacturer name
 	ManufacturerName string `json:"manufacturerName,omitempty"`
-	SerialNumber     string `json:"serialNumber,omitempty"`
-	PortId           string `json:"portId,omitempty"`
+	// TIC modem USB serial number
+	SerialNumber string `json:"serialNumber,omitempty"`
+	// TIC modem USB port ID
+	PortId string `json:"portId,omitempty"`
 }
 
-type TICData struct {
-	Mode            string            `json:"mode"`
-	CaptureDateTime string            `json:"captureDateTime"`
-	Identifier      TICIdentifier     `json:"identifier"`
-	Content         map[string]string `json:"content"`
+// TicData represents the TIC data read or received from the TIC2WebSocket server
+type TicData struct {
+	// TIC format (e.g. "STANDARD", "HISTORIC")
+	Mode string `json:"mode"`
+	// TIC capture date time (format "2006-01-02T15:04:05.000Z07:00")
+	CaptureDateTime string `json:"captureDateTime"`
+	// TIC identifier associated to the data
+	Identifier TicIdentifier `json:"identifier"`
+	// TIC raw content (map of TIC data name and value)
+	Content map[string]string `json:"content"`
 }
 
-type TICError struct {
-	ErrorCode    int           `json:"errorCode"`
-	ErrorMessage string        `json:"errorMessage"`
-	Identifier   TICIdentifier `json:"identifier"`
+// TicError represents an error received from the TIC2WebSocket server
+type TicError struct {
+	// Error code (0 if no error)
+	ErrorCode int `json:"errorCode"`
+	// Error message (empty if no error)
+	ErrorMessage string `json:"errorMessage"`
+	// TIC identifier associated to the error
+	Identifier TicIdentifier `json:"identifier"`
 }
 
-type TIC2WebsocketRequest struct {
+type tic2WebsocketRequest struct {
 	Name string      `json:"name"`
 	Type string      `json:"type"`
 	Data interface{} `json:"data,omitempty"`
 }
 
-type TIC2WebsocketResponse struct {
+type tic2WebsocketResponse struct {
 	Name         string      `json:"name"`
 	Type         string      `json:"type"`
 	DateTime     string      `json:"dateTime"`
@@ -95,30 +132,33 @@ type TIC2WebsocketResponse struct {
 	Data         interface{} `json:"data,omitempty"`
 }
 
-type TIC2WebsocketEvent struct {
+type tic2WebsocketEvent struct {
 	Name     string                 `json:"name"`
 	Type     string                 `json:"type"`
 	DateTime string                 `json:"dateTime"`
 	Data     map[string]interface{} `json:"data"`
 }
 
-func IsEmptyIdentifier(identifier TICIdentifier) bool {
+// IsEmptyIdentifier returns true if the TIC identifier is empty, false otherwise
+func IsEmptyIdentifier(identifier TicIdentifier) bool {
 	return len(identifier.PortId) == 0 && len(identifier.PortName) == 0 && len(identifier.SerialNumber) == 0
 }
 
-func NewTIC2WebsocketClient() *TIC2WebsocketClient {
-	client := &TIC2WebsocketClient{}
+// NewTic2WebsocketClient creates a new TIC2WebSocket client
+func NewTic2WebsocketClient() *Tic2WebsocketClient {
+	client := &Tic2WebsocketClient{}
 
-	client.subscriberMap = make(map[string]TICSubsciberMapEntry)
+	client.subscriberMap = make(map[string]ticSubsciberMapEntry)
 	client.stopReadMessagesChannel = make(chan bool)
-	client.responseChannel = make(chan TIC2WebsocketResponse)
+	client.responseChannel = make(chan tic2WebsocketResponse)
 
 	return client
 }
 
-func (t *TIC2WebsocketClient) Connect(host string) error {
+// Connect connects to the TIC2WebSocket server at the given host
+func (t *Tic2WebsocketClient) Connect(host string) error {
 	if t.connected.Load() {
-		return ErrTIC2WebsocketAlreadyConnected
+		return errTic2WebsocketAlreadyConnected
 	}
 	url := url.URL{Scheme: "ws", Host: host, Path: "/"}
 	connection, response, error := websocket.DefaultDialer.Dial(url.String(), nil)
@@ -138,26 +178,29 @@ func (t *TIC2WebsocketClient) Connect(host string) error {
 	return nil
 }
 
-func (t *TIC2WebsocketClient) IsConnected() bool {
+// IsConnected returns true if the connection with the TIC2WebSocket server is established, false otherwise
+func (t *Tic2WebsocketClient) IsConnected() bool {
 	return t.connected.Load()
 }
 
-func (t *TIC2WebsocketClient) GetAvailableTICs() ([]TICIdentifier, error) {
-	var availableTICs []TICIdentifier
+// GetAvailableTics returns the list of available TICs stream from the TIC2WebSocket server
+func (t *Tic2WebsocketClient) GetAvailableTics() ([]TicIdentifier, error) {
+	var availableTICs []TicIdentifier
 
-	response, error := t.executeTransaction(TIC2WebsocketRequest{Type: "REQUEST", Name: "GetAvailableTICs"})
+	response, error := t.executeTransaction(tic2WebsocketRequest{Type: "REQUEST", Name: "GetAvailableTICs"})
 	if error != nil {
-		return []TICIdentifier{}, error
+		return []TicIdentifier{}, error
 	}
 	error = mapstructure.Decode(response.Data, &availableTICs)
 
 	return availableTICs, error
 }
 
-func (t *TIC2WebsocketClient) GetModemsInfo() ([]ModemInfo, error) {
+// GetModemsInfo returns the list of TIC modems information from the TIC2WebSocket server
+func (t *Tic2WebsocketClient) GetModemsInfo() ([]ModemInfo, error) {
 	var modemsInfo []ModemInfo
 
-	response, error := t.executeTransaction(TIC2WebsocketRequest{Type: "REQUEST", Name: "GetModemsInfo"})
+	response, error := t.executeTransaction(tic2WebsocketRequest{Type: "REQUEST", Name: "GetModemsInfo"})
 	if error != nil {
 		return []ModemInfo{}, error
 	}
@@ -166,44 +209,47 @@ func (t *TIC2WebsocketClient) GetModemsInfo() ([]ModemInfo, error) {
 	return modemsInfo, error
 }
 
-func (t *TIC2WebsocketClient) ReadTIC(identifier TICIdentifier) (TICData, error) {
-	var ticData TICData
+// ReadTic reads the TIC data identified by the given TIC identifier from the TIC2WebSocket server
+func (t *Tic2WebsocketClient) ReadTic(identifier TicIdentifier) (TicData, error) {
+	var ticData TicData
 
-	response, error := t.executeTransaction(TIC2WebsocketRequest{Type: "REQUEST", Name: "ReadTIC", Data: identifier})
+	response, error := t.executeTransaction(tic2WebsocketRequest{Type: "REQUEST", Name: "ReadTIC", Data: identifier})
 	if error != nil {
-		return TICData{}, error
+		return TicData{}, error
 	}
 	error = mapstructure.Decode(response.Data, &ticData)
 
 	return ticData, error
 }
 
-func (t *TIC2WebsocketClient) SubscribeTIC(onData OnTICData, onError OnTICError, onAbnormalClosure OnTICAbnormalClosure, ticIdentifier TICIdentifier) (string, error) {
+// SubscribeTic subscribes to the TIC data identified by the given TIC identifier from the TIC2WebSocket server and returns a subscription ID
+func (t *Tic2WebsocketClient) SubscribeTic(onData OnTicData, onError OnTicError, onAbnormalClosure OnTicAbnormalClosure, ticIdentifier TicIdentifier) (string, error) {
 	if IsEmptyIdentifier(ticIdentifier) {
 		return "", fmt.Errorf("cannot subscribe with empty identifier")
 	}
-	request := TIC2WebsocketRequest{Type: "REQUEST", Name: "SubscribeTIC", Data: ticIdentifier}
+	request := tic2WebsocketRequest{Type: "REQUEST", Name: "SubscribeTIC", Data: ticIdentifier}
 
 	_, error := t.executeTransaction(request)
 	if error != nil {
 		return "", error
 	}
 	subscriptionId := uuid.New().String()
-	subscriber := TICEventSubscriber{onData: onData, onError: onError, onAbnormalClosure: onAbnormalClosure}
+	subscriber := ticEventSubscriber{onData: onData, onError: onError, onAbnormalClosure: onAbnormalClosure}
 	t.subscriberLock.Lock()
-	entry := TICSubsciberMapEntry{ticIdentifier: ticIdentifier, eventSubscriber: subscriber}
+	entry := ticSubsciberMapEntry{ticIdentifier: ticIdentifier, eventSubscriber: subscriber}
 	t.subscriberMap[subscriptionId] = entry
 	t.subscriberLock.Unlock()
 
 	return subscriptionId, nil
 }
 
-func (t *TIC2WebsocketClient) UnsubscribeTIC(subscriptionId string) error {
+// UnsubscribeTic unsubscribes from the TIC data updates using the subscription ID
+func (t *Tic2WebsocketClient) UnsubscribeTic(subscriptionId string) error {
 	_, ok := t.subscriberMap[subscriptionId]
 	if !ok {
 		return fmt.Errorf("subscriber id '%s' not found", subscriptionId)
 	}
-	_, error := t.executeTransaction(TIC2WebsocketRequest{Type: "REQUEST", Name: "UnsubscribeTIC"})
+	_, error := t.executeTransaction(tic2WebsocketRequest{Type: "REQUEST", Name: "UnsubscribeTIC"})
 	if error != nil {
 		return error
 	}
@@ -214,8 +260,9 @@ func (t *TIC2WebsocketClient) UnsubscribeTIC(subscriptionId string) error {
 	return nil
 }
 
-func (t *TIC2WebsocketClient) GetSubscribers(ticIdentifier TICIdentifier) map[string]TICIdentifier {
-	subscriberIdMap := make(map[string]TICIdentifier)
+// GetSubscribers returns the map of subscription IDs and their TIC identifiers for the given TIC identifier
+func (t *Tic2WebsocketClient) GetSubscribers(ticIdentifier TicIdentifier) map[string]TicIdentifier {
+	subscriberIdMap := make(map[string]TicIdentifier)
 
 	t.subscriberLock.Lock()
 	for id, entry := range t.subscriberMap {
@@ -228,7 +275,8 @@ func (t *TIC2WebsocketClient) GetSubscribers(ticIdentifier TICIdentifier) map[st
 	return subscriberIdMap
 }
 
-func (t *TIC2WebsocketClient) CheckSubscriber(subscriptionId string, ticIdentifier TICIdentifier) bool {
+// CheckSubscriber checks if the given subscription ID is subscribed to the given TIC identifier
+func (t *Tic2WebsocketClient) CheckSubscriber(subscriptionId string, ticIdentifier TicIdentifier) bool {
 	subscriberIdMap := t.GetSubscribers(ticIdentifier)
 	if len(subscriberIdMap) > 0 {
 		for id := range subscriberIdMap {
@@ -241,7 +289,7 @@ func (t *TIC2WebsocketClient) CheckSubscriber(subscriptionId string, ticIdentifi
 	return false
 }
 
-func (t *TIC2WebsocketClient) readMessages() {
+func (t *Tic2WebsocketClient) readMessages() {
 	log.Debug("Start readMessages")
 	t.readMessagesRunning.Store(true)
 	for {
@@ -269,7 +317,7 @@ func (t *TIC2WebsocketClient) readMessages() {
 				continue
 			}
 			if message["type"] == "RESPONSE" {
-				var response TIC2WebsocketResponse
+				var response tic2WebsocketResponse
 				error = json.Unmarshal(messageBytes, &response)
 				if error != nil {
 					log.Errorf("cannot decode response from message %+v : %s", message, error.Error())
@@ -278,7 +326,7 @@ func (t *TIC2WebsocketClient) readMessages() {
 				log.Tracef("Response : %+v\n", response)
 				t.responseChannel <- response
 			} else if message["type"] == "EVENT" {
-				var event TIC2WebsocketEvent
+				var event tic2WebsocketEvent
 				error = json.Unmarshal(messageBytes, &event)
 				if error != nil {
 					log.Errorf("cannot decode event from message %+v : %s", message, error.Error())
@@ -292,7 +340,7 @@ func (t *TIC2WebsocketClient) readMessages() {
 					continue
 				}
 				if event.Name == "OnTICData" {
-					var ticData TICData
+					var ticData TicData
 					error = json.Unmarshal(dataBytes, &ticData)
 					if error != nil {
 						log.Errorf("cannot decode ticData from event %+v : %s", event, error.Error())
@@ -304,7 +352,7 @@ func (t *TIC2WebsocketClient) readMessages() {
 					}
 					t.subscriberLock.Unlock()
 				} else if event.Name == "OnError" {
-					var ticError TICError
+					var ticError TicError
 					error = json.Unmarshal(dataBytes, &ticError)
 					if error != nil {
 						log.Errorf("cannot decode ticError from event %+v : %s", event, error.Error())
@@ -321,9 +369,10 @@ func (t *TIC2WebsocketClient) readMessages() {
 	}
 }
 
-func (t *TIC2WebsocketClient) Close() error {
+// Close closes the connection to the TIC2WebSocket server
+func (t *Tic2WebsocketClient) Close() error {
 	if !t.connected.Load() {
-		return ErrTIC2WebsocketNotConnected
+		return errTic2WebsocketNotConnected
 	}
 	deadline := time.Now().Add(1 * time.Second)
 	error := t.connection.WriteControl(
@@ -351,7 +400,7 @@ func (t *TIC2WebsocketClient) Close() error {
 	return error
 }
 
-func (t *TIC2WebsocketClient) onAbnormalClosure() {
+func (t *Tic2WebsocketClient) onAbnormalClosure() {
 	log.Error("abnormal closure detected")
 	t.subscriberLock.Lock()
 	for _, entry := range t.subscriberMap {
@@ -365,23 +414,23 @@ func (t *TIC2WebsocketClient) onAbnormalClosure() {
 	t.connected.Store(false)
 }
 
-func (t *TIC2WebsocketClient) executeTransaction(request TIC2WebsocketRequest) (TIC2WebsocketResponse, error) {
+func (t *Tic2WebsocketClient) executeTransaction(request tic2WebsocketRequest) (tic2WebsocketResponse, error) {
 	if !t.connected.Load() {
-		return TIC2WebsocketResponse{}, ErrTIC2WebsocketNotConnected
+		return tic2WebsocketResponse{}, errTic2WebsocketNotConnected
 	}
 	requestBytes, error := json.Marshal(request)
 	if error != nil {
-		return TIC2WebsocketResponse{}, fmt.Errorf("cannot encode %s request : %s", request.Name, error.Error())
+		return tic2WebsocketResponse{}, fmt.Errorf("cannot encode %s request : %s", request.Name, error.Error())
 	}
 	log.Tracef("Request  : %s\n", string(requestBytes))
 	error = t.connection.WriteMessage(websocket.TextMessage, requestBytes)
 	if error != nil {
-		return TIC2WebsocketResponse{}, fmt.Errorf("cannot send %s request : %s", request.Name, error.Error())
+		return tic2WebsocketResponse{}, fmt.Errorf("cannot send %s request : %s", request.Name, error.Error())
 	}
 	processTimeout := time.After(10 * time.Second)
 	select {
 	case <-processTimeout:
-		return TIC2WebsocketResponse{}, fmt.Errorf("%s timeout", request.Name)
+		return tic2WebsocketResponse{}, fmt.Errorf("%s timeout", request.Name)
 	case response := <-t.responseChannel:
 		if response.ErrorCode != 0 {
 			return response, fmt.Errorf("%s failed : %s", request.Name, response.ErrorMessage)

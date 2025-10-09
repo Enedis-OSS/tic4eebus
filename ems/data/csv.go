@@ -32,8 +32,8 @@ var (
 	headers = []string{
 		"Timestamp",
 		"IsConnected",
-		"HasMeter",
-		"HasOPEV",
+		"HasMeterData",
+		"IsOpevSupported",
 		"EV_IsConnected",
 		"EV_AsymetricChargingSupport",
 		"EV_ChargeState",
@@ -132,6 +132,7 @@ type formatter struct {
 	ColumnSeparator string
 }
 
+// CsvWriter is a writer that saves the data model to a CSV file with rotation
 type CsvWriter struct {
 	logger *log.Logger
 }
@@ -141,6 +142,7 @@ func (f *formatter) Format(entry *log.Entry) ([]byte, error) {
 	return []byte(fmt.Sprintf("%s%s%s\n", timestamp, f.ColumnSeparator, entry.Message)), nil
 }
 
+// NewCsvWriter creates a new CsvWriter with the given configuration
 func NewCsvWriter(config *config.CsvConfig) *CsvWriter {
 	if config == nil {
 		return nil
@@ -177,6 +179,7 @@ func NewCsvWriter(config *config.CsvConfig) *CsvWriter {
 	return handler
 }
 
+// Save saves the data model to the CSV file
 func (h *CsvWriter) Save(model DataModel) {
 	if h == nil {
 		return
@@ -200,8 +203,8 @@ func writeHeaders(fileName string) {
 
 func extractColumns(model DataModel) []string {
 	IsConnected := strconv.FormatBool(model.IsConnected)
-	HasMeter := strconv.FormatBool(model.HasMeter)
-	HasOPEV := strconv.FormatBool(model.HasOPEV)
+	HasMeter := strconv.FormatBool(model.HasMeterData)
+	HasOPEV := strconv.FormatBool(model.IsOpevSupported)
 	EV_IsConnected := extractColumn_EV_IsConnected(model.Vehicle)
 	EV_AsymetricChargingSupport := extractColumn_EV_AsymetricChargingSupport(model.Vehicle)
 	EV_ChargeState := extractColumn_EV_ChargeState(model.Vehicle)
