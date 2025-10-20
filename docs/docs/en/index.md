@@ -19,12 +19,12 @@ as metering source to control electrical vehicle charge through a wallbox (i.e t
 
 ### Linky Meter Integration
 
-The integration of a Linky meter into the EEBUS ecosystem is described in a document available [here](https://www.eebus.org/wp-content/uploads/2025/05/Integration-of-the-Linky-Smart-Meter-within-EEBUS-ecosystem.pdf).
+The integration of a Linky meter into the EEBUS ecosystem is described in a document available [here](../ref/Integration-of-the-Linky-Smart-Meter-within-EEBUS-ecosystem.pdf).
 
 ### OPEV Use Case
 
 The OPEV (Overload Protection by EV Charging Current Curtailment) use case from the EEBUS standard, designed to prevent
-the circuit breaker upstream of the electrical installation from tripping, can be downloaded [here](https://www.eebus.org/wp-content/uploads/2023/04/EEBus_UC_TS_OverloadProtectionByEVChargingCurrentCurtailment_V1.0.1b.pdf).
+the circuit breaker upstream of the electrical installation from tripping, can be downloaded [here](../ref/EEBus_UC_TS_OverloadProtectionByEVChargingCurrentCurtailment_V1.0.1b.pdf).
 
 ## Purpose
 

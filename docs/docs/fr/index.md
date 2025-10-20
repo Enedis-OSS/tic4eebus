@@ -18,12 +18,12 @@ L'application **tic4eebus** est utilisée comme gestionnaire d'energie (EnergyGu
 
 ### Intégration du compteur Linky
 
-L'intégration d'un compteur Linky dans l'écosystème EEBUS est décrite dans un document disponible [ici](https://www.eebus.org/wp-content/uploads/2025/05/Integration-of-the-Linky-Smart-Meter-within-EEBUS-ecosystem.pdf).
+L'intégration d'un compteur Linky dans l'écosystème EEBUS est décrite dans un document disponible [ici](../ref/Integration-of-the-Linky-Smart-Meter-within-EEBUS-ecosystem.pdf).
 
 ### Cas d'utilisation OPEV
 
 Le cas d'utilisation OPEV (Overload Protection by EV Charging Current Curtailment) de la norme EEBUS destiné à empêcher
-le déclechement du disjoncteur en amont de l'installation électrique est téléchargeable [ici](https://www.eebus.org/wp-content/uploads/2023/04/EEBus_UC_TS_OverloadProtectionByEVChargingCurrentCurtailment_V1.0.1b.pdf).
+le déclechement du disjoncteur en amont de l'installation électrique est téléchargeable [ici](../ref/EEBus_UC_TS_OverloadProtectionByEVChargingCurrentCurtailment_V1.0.1b.pdf).
 
 ## Objectif
 

@@ -50,3 +50,8 @@ theme:
     favicon: img/favicon.ico
     font:
       text: Ubuntu
+    features:
+          - navigation.sections
+          - navigation.expand
+          - navigation.indexes
+          - toc.integrate
