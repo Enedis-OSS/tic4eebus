@@ -12,6 +12,7 @@ path = ["**/*.sum",
     "**/*.key",
     "**/*.png",
     "**/*.ico",
+    "**/*.pdf",
 ]
 SPDX-FileCopyrightText = "2025 Enedis Smarties team <dt-dsi-nexus-lab-smarties@enedis.fr>"
 SPDX-License-Identifier = "Apache-2.0"

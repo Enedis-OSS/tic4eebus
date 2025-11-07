@@ -8,6 +8,15 @@ site_description: Documentation tic4eebus
 
 # Multilingual configuration
 plugins:
+  - plantuml:
+        #puml_url: https://www.plantuml.com/plantuml/
+        puml_url: http://plantuml:8080
+        puml_keyword: plantuml
+        output_format: svg
+        theme:
+          enabled: true
+          light: default/light
+          dark: default/dark
   - search
   - i18n:
       docs_structure: folder

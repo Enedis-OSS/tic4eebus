@@ -20,7 +20,7 @@
 ### ✨ Nouvelles fonctionnalités :
 * Cas d'utilisation OPEV EEBUS (scénario 1) : Le gestionnaire d'énergie limite le courant de charge du VE
 * Cas d'utilisation OPEV EEBUS (scénario 2) : Le VE vérifie la disponibilité du gestionnaire d'énergie
-* Cas d'utilisation OPEV EEBUS (scénario 3) : Le gestionnaire d'énergi envoie un état d'erreur
+* Cas d'utilisation OPEV EEBUS (scénario 3) : Le gestionnaire d'énergie envoie un état d'erreur
 * Fichier de configuration avec paramètres pour la protection contre les surcharges, VE, logs, modèle de données, télé-information client compteur Linky, EEBUS
 * Fichier de log avec rotation
 * Interpréteur de ligne de commande avec aide, version et chemin du fichier de configuration

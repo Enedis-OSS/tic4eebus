@@ -67,7 +67,7 @@ Les données de limitation de la charge du gestionnaire d'énergie sont les suiv
 
 |Nom|Description|Mode|Format|Valeur|
 |---|-----------|----|------|------|
-| *Active* | État d'activation de la limitation de charge de VE | Lecture/Écriture | Booléen | - **true** si une limitation est appliqué <br>- **false** sinon |
+| *Active* | État d'activation de la limitation de charge du VE | Lecture/Écriture | Booléen | - **true** si une limitation est appliqué <br>- **false** sinon |
 | *Value* | Valeur de la limitation de charge du VE en A | Lecture/Écriture | Décimal | De 0.0 à 32.0 |
 | *Start* | Horodate de début de limitation de charge du VE | Lecture/Écriture | Date au format UTC | "2025-10-09T10:35:00+02:00" |
 | *ResultCode* | Code de résultat de la dernière limitation de charge de VE | Lecture/Écriture | Énumération | Valeurs de [ErrorNumberType](#errornumbertype) |
