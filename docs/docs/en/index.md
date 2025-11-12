@@ -10,7 +10,7 @@
 
 ## Introduction
 
-The **tic4eebus** application is used as a energy management system (referred as EnergyGuard in EEBUS documentation) using Linky customer interface (known as Télé Information Client or TIC)
+The **tic4eebus** application is used as an energy management system (referred as EnergyGuard in EEBUS documentation) using Linky customer interface (known as Télé Information Client or TIC)
 as metering source to control electrical vehicle charge through a wallbox (i.e the EEBUS interface).
 
 ![Overview diagram](../img/overview_diagram.png)

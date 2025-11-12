@@ -26,7 +26,7 @@
 
 ## <a name="doc"></a> How to contribute to the documentation
 
-To contribute to this documentation (README, CONTRIBUTING, etc.), we conforms to the [CommonMark Spec](http://spec.commonmark.org/0.27/)
+To contribute to this documentation (README, CONTRIBUTING, etc.), we conform to the [CommonMark Spec](http://spec.commonmark.org/0.27/)
 
 * [https://www.makeareadme.com/#suggestions-for-a-good-readme](https://www.makeareadme.com/#suggestions-for-a-good-readme)
 * [https://help.github.com/en/articles/setting-guidelines-for-repository-contributors](https://help.github.com/en/articles/setting-guidelines-for-repository-contributors)
@@ -38,12 +38,12 @@ To contribute to this documentation (README, CONTRIBUTING, etc.), we conforms to
 2. Create your working branches conforming to [conventional branch](https://conventional-branch.github.io/).
     * **WARNING** - Do not modify the main branch nor any of our branches since it will break the automatic sync
 3. When you are done, fetch all and rebase your branch onto our main or any other of ours
-    * ex. on your branch, do :
+    * ex. on your branch, do:
         * `git fetch --all --prune`
         * `git rebase --no-ff origin/main`
 4. Test your changes and make sure everything is working
 5. Submit your Pull Request to the dev branch (main branch is only allowed for project owners)
-    * Do not forget to add reviewers ! Check out the last authors of the code you modified and add them.
+    * Do not forget to add reviewers! Check out the last authors of the code you modified and add them.
     * In case of doubts, here are active contributors :
         * Jehan BOUSCH
 

@@ -32,8 +32,8 @@ plugins:
             Overview: Vue d'ensemble
             Installation: Installation
             Configuration: Configuration
-            "Software Architecture": Architecture logicielle
-            "Data Model" : Modèle de données
+            Architecture: Architecture logicielle
+            Model : Modèle de données
         - locale: en
           name: English
           build: true
@@ -41,16 +41,16 @@ plugins:
             Overview: Overview
             Installation: Installation
             Configuration: Configuration
-            "Software Architecture": Software Architecture
-            "Data Model" : Data Model
+            Architecture: Software Architecture
+            Model : Data Model
 
 # Site navigation
 nav:
   - Overview: index.md
   - Installation: installation.md
   - Configuration: configuration.md
-  - "Software Architecture": architecture.md
-  - "Data Model": data_model.md
+  - Architecture: architecture.md
+  - Model: data_model.md
 
 theme:
     name: material

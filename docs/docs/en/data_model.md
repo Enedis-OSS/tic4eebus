@@ -23,7 +23,7 @@ Each of the above actors has a specific data model.
 
 ## Metering Device Data Model (Meter)
 
-The Linky meter provides us with the following data:
+The Linky meter provides the following data:
 
 |Name|Description|Mode|Format|Value|
 |----|-----------|----|------|-----|
