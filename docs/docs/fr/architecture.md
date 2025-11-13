@@ -243,11 +243,11 @@ config.Config o-- config.LogConfig
 
 #### Description
 
-Le composant **_config_** est le composant chargé du chargement de l'ensemble des configurations de l'application.
+Le composant **_config_** est le composant qui s'occupe du chargement de l'ensemble des configurations de l'application.
 
 Il utilise :
 
-- La configuration de l'algorithme métier implémentant le cas d'utilisation OPEV de la norme EEBUS (classe **_config.OverloadProtectionConfig_**)
+- La configuration de l'algorithme de protection des surcharges implémentant le cas d'utilisation OPEV de la norme EEBUS (classe **_config.OverloadProtectionConfig_**)
 - La configuration de l'accès aux données du véhicule électrique (classe **_config.VehicleConfig_**)
 - La configuration de l'accès aux données de la borne de recharge (classe **_config.WallboxConfig_**)
 - La configuration des journaux de bord de l'application (classe **_config.LogConfig_**)
@@ -265,8 +265,8 @@ Le module **_config_** n'a pas de dépendances internes.
 
 Le module **_config_** utilise 2 dépendances externes :
 
-1. Le paquet **_[logrus](https://github.com/sirupsen/logrus)_** pour utiliser le type correspondant au niveau de journalisation souhaité
-2. Le paquet **_[yaml](https://github.com/go-yaml/yaml)_** pour décoder les données du fichier de configuration au format YAML
+1. Le paquet **_[logrus](https://github.com/sirupsen/logrus)_** pour utiliser le niveau de journalisation souhaité
+2. Le paquet **_[yaml](https://github.com/go-yaml/yaml)_** pour décoder le fichier de configuration au format YAML
 
 #### Diagramme de Classe
 
@@ -1177,7 +1177,7 @@ actor Vehicle
 
 Scheduler --> EnergyGuard ++ : runOverloadProtection()
 
-EnergyGuard --> EnergyGuardData ++ : IsConnected()
+EnergyGuard --> DataSynchronizer ++ : IsConnected()
 return État de la connexion EEBUS
 
 EnergyGuard --> Vehicle ++ : IsConnected()
