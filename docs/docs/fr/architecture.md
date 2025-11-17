@@ -6,8 +6,7 @@
   ~ SPDX-License-Identifier: Apache-2.0
 -->
 
-# Architecture logiciel tic4eebus
-
+# Architecture logicielle
 
 ## Introduction
 

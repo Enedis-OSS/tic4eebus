@@ -53,7 +53,7 @@ To contribute to this documentation (README, CONTRIBUTING, etc.), we conform to 
 ### Best Practices
 
 As a general rule you have to follow the [go style guide](https://google.github.io/styleguide/go/).
-Read the [best pratices](https://google.github.io/styleguide/go/best-practices) section before making a Pull Reques.
+Read the [best pratices](https://google.github.io/styleguide/go/best-practices) section before making a Pull Request.
 
 ### Acronyms
 
@@ -97,7 +97,7 @@ To run all the tests of the project use the following command :
 ### Naming
 
 * Tests are located in the **same directory** as the code under test.
-* When you write a test file name should end with **_test.go**.
+* A test file name should end with **_test.go**.
 * All test functions must start with a `Test` prefix and use PascalCase.
 
 ### Assertions
@@ -120,7 +120,7 @@ We conform to [conventional commit](https://www.conventionalcommits.org/en/v1.0.
 
 Project dependencies are listed in the go.mod file. The go.sum file, on the other hand, contains the cryptographic checksums of the content of specific module versions, including both direct and indirect dependencies.
 
-To see modules really "used" by the application use the following command :
+To see modules really "used" by the application, use the following command :
    ```
    go list -m all
    ```
