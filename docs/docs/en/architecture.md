@@ -20,7 +20,7 @@ The **tic4eebus** application allows limiting an electric vehicle (EV) charging 
 
 The software implements the OPEV use case of the EEBUS standard by acting as an energy management system (Energy Guard) to control the EV charging station (CEM) based on data read from the Linky meter (Smart Meter).
 
-![Overview diagram](../img/overview_diagram.png)
+![Overview diagram](../var/images/overview_diagram.png)
 
 ## Architecture Overview
 

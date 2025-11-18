@@ -17,7 +17,7 @@ Le projet **tic4eebus** est organisé autour de 4 acteurs :
 3. La borne de recharge de véhicule électrique
 4. Le véhicule électrique
 
-![Acteurs du modèle de données](../img/actors_diagram_fr.png)
+![Acteurs du modèle de données](../var/images/actors_diagram_fr.png)
 
 Chacun des acteurs ci-dessus possède un modèle de données spécifique.
 
@@ -122,12 +122,12 @@ Le véhicule électrique nous fournit les données suivantes :
 
 Les documents de référence utilisés pour le modèle de données sont :
 
-- [EEBus_SPINE_TS_ProtocolSpecification.pdf](../ref/EEBus_SPINE_TS_ProtocolSpecification.pdf)
-- [EEBus_SPINE_TS_ResourceSpecification.pdf](../ref/EEBus_SPINE_TS_ResourceSpecification.pdf)
+- [EEBus_SPINE_TS_ProtocolSpecification.pdf](../var/references/EEBus_SPINE_TS_ProtocolSpecification.pdf)
+- [EEBus_SPINE_TS_ResourceSpecification.pdf](../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf)
 
 ### ErrorNumberType
 
-L'énumération ErrorNumberType (voir [Table 19](../ref/EEBus_SPINE_TS_ResourceSpecification.pdf#page=71)) indique le type d'erreur.
+L'énumération ErrorNumberType (voir [Table 19](../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf#page=71)) indique le type d'erreur.
 
 Elle peut prendre les valeurs suivantes :
 
@@ -146,7 +146,7 @@ Elle peut prendre les valeurs suivantes :
 
 ### DeviceDiagnosisOperatingStateEnumType
 
-L'énumération DeviceDiagnosisOperatingStateEnumType (voir [Table 45](../ref/EEBus_SPINE_TS_ResourceSpecification.pdf#page=108)) décrit l'état fonctionnel de l'équipement.
+L'énumération DeviceDiagnosisOperatingStateEnumType (voir [Table 45](../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf#page=108)) décrit l'état fonctionnel de l'équipement.
 
 Elle peut prendre les valeurs suivantes :
 
@@ -165,7 +165,7 @@ Elle peut prendre les valeurs suivantes :
 
 ### DeviceClassificationManufacturerDataType
 
-La structure de données DeviceClassificationManufacturerDataType (voir [§5.3.7.2](../ref/EEBus_SPINE_TS_ResourceSpecification.pdf#page=301)) identifie et décrit un équipement à l'aide des champs suivant :
+La structure de données DeviceClassificationManufacturerDataType (voir [§5.3.7.2](../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf#page=301)) identifie et décrit un équipement à l'aide des champs suivant :
 
 |Nom du champ | Description du champ | Format du champ | Exemple |
 |-------------|----------------------|-----------------|---------|
@@ -184,7 +184,7 @@ La structure de données DeviceClassificationManufacturerDataType (voir [§5.3.7
 
 ### IdentificationTypeEnumType
 
-L'énumération IdentificationTypeEnumType (voir [Table 231](../ref/EEBus_SPINE_TS_ResourceSpecification.pdf#page=348)) qui décrit le type d'identifiant.
+L'énumération IdentificationTypeEnumType (voir [Table 231](../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf#page=348)) qui décrit le type d'identifiant.
 
 Elle peut prendre les valeurs suivantes :
 
@@ -196,7 +196,7 @@ Elle peut prendre les valeurs suivantes :
 
 ### ElectricalConnectionPhaseNameEnumType
 
-L'énumération ElectricalConnectionPhaseNameEnumType (voir [Table 209](../ref/EEBus_SPINE_TS_ResourceSpecification.pdf#page=324)) qui indique la ou les phases mesurée.
+L'énumération ElectricalConnectionPhaseNameEnumType (voir [Table 209](../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf#page=324)) qui indique la ou les phases mesurée.
 
 Elle peut prendre les valeurs suivantes :
 

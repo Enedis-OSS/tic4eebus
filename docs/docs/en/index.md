@@ -13,18 +13,18 @@
 The **tic4eebus** application is used as an energy management system (referred as EnergyGuard in EEBUS documentation) using Linky customer interface (known as Télé Information Client or TIC)
 as metering source to control electrical vehicle charge through a wallbox (i.e the EEBUS interface).
 
-![Overview diagram](../img/overview_diagram.png)
+![Overview diagram](../var/images/overview_diagram.png)
 
 ## References
 
 ### Linky Meter Integration
 
-The integration of a Linky meter into the EEBUS ecosystem is described in a document available [here](../ref/Integration-of-the-Linky-Smart-Meter-within-EEBUS-ecosystem.pdf).
+The integration of a Linky meter into the EEBUS ecosystem is described in a document available [here](../var/references/Integration-of-the-Linky-Smart-Meter-within-EEBUS-ecosystem.pdf).
 
 ### OPEV Use Case
 
 The OPEV (Overload Protection by EV Charging Current Curtailment) use case from the EEBUS standard, designed to prevent
-the circuit breaker upstream of the electrical installation from tripping, can be downloaded [here](../ref/EEBus_UC_TS_OverloadProtectionByEVChargingCurrentCurtailment_V1.0.1b.pdf).
+the circuit breaker upstream of the electrical installation from tripping, can be downloaded [here](../var/references/EEBus_UC_TS_OverloadProtectionByEVChargingCurrentCurtailment_V1.0.1b.pdf).
 
 ## Purpose
 

@@ -17,7 +17,7 @@ The **tic4eebus** project is organized around 4 actors:
 3. The electric vehicle charging station
 4. The electric vehicle
 
-![Data model actors](../img/actors_diagram_en.png)
+![Data model actors](../var/images/actors_diagram_en.png)
 
 Each of the above actors has a specific data model.
 
@@ -122,12 +122,12 @@ The electric vehicle provides us with the following data:
 
 The reference documents used for the data model are:
 
-- [EEBus_SPINE_TS_ProtocolSpecification.pdf](../ref/EEBus_SPINE_TS_ProtocolSpecification.pdf)
-- [EEBus_SPINE_TS_ResourceSpecification.pdf](../ref/EEBus_SPINE_TS_ResourceSpecification.pdf)
+- [EEBus_SPINE_TS_ProtocolSpecification.pdf](../var/references/EEBus_SPINE_TS_ProtocolSpecification.pdf)
+- [EEBus_SPINE_TS_ResourceSpecification.pdf](../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf)
 
 ### ErrorNumberType
 
-The ErrorNumberType enumeration (see [Table 19](../ref/EEBus_SPINE_TS_ResourceSpecification.pdf#page=71)) indicates the type of error.
+The ErrorNumberType enumeration (see [Table 19](../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf#page=71)) indicates the type of error.
 
 It can take the following values:
 
@@ -146,7 +146,7 @@ It can take the following values:
 
 ### DeviceDiagnosisOperatingStateEnumType
 
-The DeviceDiagnosisOperatingStateEnumType enumeration (see [Table 45](../ref/EEBus_SPINE_TS_ResourceSpecification.pdf#page=108)) describes the operational state of the equipment.
+The DeviceDiagnosisOperatingStateEnumType enumeration (see [Table 45](../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf#page=108)) describes the operational state of the equipment.
 
 It can take the following values:
 
@@ -165,7 +165,7 @@ It can take the following values:
 
 ### DeviceClassificationManufacturerDataType
 
-The DeviceClassificationManufacturerDataType data structure (see [§5.3.7.2](../ref/EEBus_SPINE_TS_ResourceSpecification.pdf#page=301)) identifies and describes equipment using the following fields:
+The DeviceClassificationManufacturerDataType data structure (see [§5.3.7.2](../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf#page=301)) identifies and describes equipment using the following fields:
 
 |Field Name | Field Description | Field Format | Example |
 |-----------|-------------------|--------------|---------|
@@ -184,7 +184,7 @@ The DeviceClassificationManufacturerDataType data structure (see [§5.3.7.2](../
 
 ### IdentificationTypeEnumType
 
-The IdentificationTypeEnumType enumeration (see [Table 231](../ref/EEBus_SPINE_TS_ResourceSpecification.pdf#page=348)) describes the type of identifier.
+The IdentificationTypeEnumType enumeration (see [Table 231](../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf#page=348)) describes the type of identifier.
 
 It can take the following values:
 
@@ -196,7 +196,7 @@ It can take the following values:
 
 ### ElectricalConnectionPhaseNameEnumType
 
-The ElectricalConnectionPhaseNameEnumType enumeration (see [Table 209](../ref/EEBus_SPINE_TS_ResourceSpecification.pdf#page=324)) indicates the measured phase(s).
+The ElectricalConnectionPhaseNameEnumType enumeration (see [Table 209](../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf#page=324)) indicates the measured phase(s).
 
 It can take the following values:
 

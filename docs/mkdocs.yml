@@ -55,8 +55,8 @@ nav:
 theme:
     name: material
     language: fr
-    logo: img/logo.png
-    favicon: img/favicon.ico
+    logo: var/images/logo.png
+    favicon: var/images/favicon.ico
     font:
       text: Ubuntu
     features:

@@ -20,7 +20,7 @@ L'application **tic4eebus** permet de limiter une borne de véhicule électrique
 
 Le logiciel implémente le cas d'utilisation OPEV de la norme EEBUS en agissant en tant que gestionnaire d'énergie (Energy Guard) pour piloter la borne VE (CEM) en fonction des données lues sur le compteur Linky (Smart Meter).
 
-![Diagramme de vue d'ensemble](../img/overview_diagram.png)
+![Diagramme de vue d'ensemble](../var/images/overview_diagram.png)
 
 ## Vue d'Ensemble de l'Architecture
 
