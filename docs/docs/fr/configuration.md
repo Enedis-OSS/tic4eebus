@@ -201,63 +201,63 @@ La rotation des fichiers comporte les champs suivants :
 Voici un exemple complet du [fichier de configuration](../var/examples/config.yaml) par défaut au format YAML :
 
 ```yaml
-# Overload protection configuration
+# Configuration de la protection des surcharges
 OverloadProtection:
   Enable : true
   RunningPeriodInSeconds : 1
   CurrentLimit :
-    ValueInAmps : 16.0 # Used only if Enable is false
-    LockDelayInSeconds : 10.0 # Used only if Enable is true
+    ValueInAmps : 16.0 # Utilisé uniquement si Enable = false
+    LockDelayInSeconds : 10.0 # Utilisé uniquement si Enable = true
 
-# Vehicle configuration
+# Configuration du véhicle électrique
 Vehicle:
-  UpdateDataPeriodInSeconds : 5 # Unused if 0
+  UpdateDataPeriodInSeconds : 5 # Inutilisé si la valeur vaut 0
   DataPersistent: false
 
-# Wallbox configuration
+# Configuration de la borne de recharge
 Wallbox:
-  UpdateDataPeriodInSeconds : 5 # Unused if 0
+  UpdateDataPeriodInSeconds : 5 # Inutilisé si la valeur vaut 0
   DataPersistent: false
 
-# Log configuration
+# Configuration de la journalisation
 Log:
-  Level : "trace" # Available levels : panic,fatal,error,warn,info,debug,trace
+  Level : "trace" # Niveaux disponibles : panic,fatal,error,warn,info,debug,trace
   FilePath : "var/log/tic4eebus.log"
   Rotation:
-    PeriodInHours : 24 # Each day a new file is created
-    PeriodCount : 15 # 15 files maximum are created (15 days of logs)
-    PeriodPattern: "-%Y-%m-%d" # Each log file name contains the year-month-day of creation
+    PeriodInHours : 24 # Chaque jour un nouveau journal de bord est créé
+    PeriodCount : 15 # 15 journaux de bord créés au maximum (15 jours d'historique)
+    PeriodPattern: "-%Y-%m-%d" # Chaque journal de bord contient dans son nom sa date de création avec le motif année-mois-jour
 
-# Data model configuration
+# Configuration du modèle de données
 DataModel:
-  # Csv file configuration (optional)
-  Csv: # If provided all fields must be provided
+  # Configuration du fichier CSV (optionnel)
+  Csv: # Si ce paramètre est fournit tous ces champs doivent être renseignés
     FilePath : "var/data/EnergyGuardDataModel.csv"
     Rotation:
-      PeriodInHours : 24 # Each day a new file is created
-      PeriodCount : 7 # 7 files maximum are created (7 days of data model)
-      PeriodPattern: "-%Y-%m-%d" # Each csv file name contains the year-month-day of creation
+      PeriodInHours : 24 # Chaque jour un nouveau fichier CSV est créé
+      PeriodCount : 7 # 7 fichiers CSV créés au maximum (7 jours d'historique)
+      PeriodPattern: "-%Y-%m-%d" # Chaque fichier CSV contient dans son nom sa date de création avec le motif année-mois-jour
 
-  # InfluxDB configuration (optional)
-  InfluxDb: # If provided all fields must be provided
+  # Configuration de la base de données InfluxDB (optionnel)
+  InfluxDb: # Si ce paramètre est fournit tous ces champs doivent être renseignés
     Bucket : "demo-bucket"
     Org : "demo-org"
-    Token : "${TIC4EEBUS_INFLUXDB_TOKEN}" # Example: "He_nwgoqXu4XggIzaiUWFHALKnS5JskdTLzGlSYeJMNkjCD-pyR6Yc5Hvl8NWj5Qo5C80mLvuJAS1IuqOcq4GQZZ"
+    Token : "${TIC4EEBUS_INFLUXDB_TOKEN}" # Exemple: "He_nwgoqXu4XggIzaiUWFHALKnS5JskdTLzGlSYeJMNkjCD-pyR6Yc5Hvl8NWj5Qo5C80mLvuJAS1IuqOcq4GQZZ"
     IpAddress : "127.0.0.1"
     TcpPort : 8086
 
-# Tele information client (TIC) configuration
+# Configuration de la téle information client (TIC)
 TeleInformationClient:
   Tic2Websocket:
     IpAddress : "127.0.0.1"
     TcpPort : 19584
   TicIdentifier:
-    SerialNumber : "" # Meter serial number should only be specified if TIC2Websocket handles multiple modems
+    SerialNumber : "" # Le numéro de série doit être spécifié si TIC2WebSocket gère plusieurs modems
 
-# EEBUS configuration
+# Configuration du protocole EEBUS
 Eebus:
   ServerPort : 4817
-  RemoteSki : "${TIC4EEBUS_REMOTE_SKI}" # Example: "50abfe7714d034b8b15e488b91831047657b9ff2"
+  RemoteSki : "${TIC4EEBUS_REMOTE_SKI}" # Exemple: "50abfe7714d034b8b15e488b91831047657b9ff2"
   CertificateFilePath : "examples/energy-guard.cert"
   PrivateKeyFilePath : "examples/energy-guard.key"
   VendorCode : "i:54076"
