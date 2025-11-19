@@ -1,0 +1,1440 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation tic4eebus">
+      
+      
+      
+        <link rel="canonical" href="https://enedis-oss.github.io/tic4eebus/en/data_model/">
+      
+      
+        <link rel="prev" href="../architecture/">
+      
+      
+      
+        
+          <link rel="alternate" href="../../data_model/" hreflang="fr">
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+      
+      
+      <link rel="icon" href="../../var/images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>Data Model - tic4eebus</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Ubuntu";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/mkdocs_puml/puml.css">
+    
+      <link rel="stylesheet" href="../../assets/mkdocs_puml/interaction.css">
+    
+      <link rel="stylesheet" href="../../assets/mkdocs_puml/puml.css">
+    
+      <link rel="stylesheet" href="../../assets/mkdocs_puml/interaction.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#data-model" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../" title="tic4eebus" class="md-header__button md-logo" aria-label="tic4eebus" data-md-component="logo">
+      
+  <img src="../../var/images/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            tic4eebus
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Data Model
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../data_model/" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Enedis-OSS/tic4eebus" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Enedis-OSS/tic4eebus
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../" title="tic4eebus" class="md-nav__button md-logo" aria-label="tic4eebus" data-md-component="logo">
+      
+  <img src="../../var/images/logo.png" alt="logo">
+
+    </a>
+    tic4eebus
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Enedis-OSS/tic4eebus" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Enedis-OSS/tic4eebus
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Model
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Introduction
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metering-device-data-model-meter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metering Device Data Model (Meter)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#energy-manager-data-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Energy Manager Data Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Energy Manager Data Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        General Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#electric-vehicle-charge-limitation-data-overloadprotection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Electric Vehicle Charge Limitation Data (OverloadProtection)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-data-diagnosis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Data (Diagnosis)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#charging-station-data-model-evse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Charging Station Data Model (EVSE)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#electric-vehicle-ev-data-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Electric Vehicle (EV) Data Model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eebus-data-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EEBUS Data Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="EEBUS Data Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reference-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reference Documents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#errornumbertype" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ErrorNumberType
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#devicediagnosisoperatingstateenumtype" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DeviceDiagnosisOperatingStateEnumType
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deviceclassificationmanufacturerdatatype" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DeviceClassificationManufacturerDataType
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#identificationtypeenumtype" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IdentificationTypeEnumType
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#electricalconnectionphasenameenumtype" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ElectricalConnectionPhaseNameEnumType
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!--
+  ~ Copyright (C) 2025 Enedis Smarties team <dt-dsi-nexus-lab-smarties@enedis.fr>
+  ~ 
+  ~ SPDX-FileContributor: Jehan BOUSCH
+  ~ 
+  ~ SPDX-License-Identifier: Apache-2.0
+-->
+
+<h1 id="data-model">Data Model</h1>
+<h2 id="introduction">Introduction</h2>
+<p>The <strong>tic4eebus</strong> project is organized around 4 actors:</p>
+<ol>
+<li>The available energy metering device (Linky meter)</li>
+<li>The energy manager responsible for limiting the electric vehicle (EnergyGuard in the EEBUS standard)</li>
+<li>The electric vehicle charging station</li>
+<li>The electric vehicle</li>
+</ol>
+<p><img alt="Data model actors" src="../../var/images/actors_diagram_en.png" /></p>
+<p>Each of the above actors has a specific data model.</p>
+<h2 id="metering-device-data-model-meter">Metering Device Data Model (Meter)</h2>
+<p>The Linky meter provides the following data:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Mode</th>
+<th>Format</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>SerialNumber</em></td>
+<td>Linky meter serial number</td>
+<td>Read</td>
+<td>12-characters string</td>
+<td>"041976216986"</td>
+</tr>
+<tr>
+<td><em>DateTime</em></td>
+<td>Linky meter timestamp</td>
+<td>Read</td>
+<td>Date in YY/MM/DD hh:mm:ss format</td>
+<td>"25/10/09 09:26:12"</td>
+</tr>
+<tr>
+<td><em>BreakerOpened</em></td>
+<td>Linky meter circuit breaker status</td>
+<td>Read</td>
+<td>Boolean</td>
+<td>- <strong>true</strong> if the circuit breaker is open <br>- <strong>false</strong> otherwise</td>
+</tr>
+<tr>
+<td><em>PhaseCount</em></td>
+<td>Number of phases on the Linky meter</td>
+<td>Read</td>
+<td>Integer</td>
+<td>- <strong>1</strong> if the meter is single-phase <br>- <strong>3</strong> if the meter is three-phase</td>
+</tr>
+<tr>
+<td><em>OverLoadPowerLimit</em></td>
+<td>Overload power limit of the Linky meter in VA across all phases</td>
+<td>Read</td>
+<td>Integer</td>
+<td>From 0 to 99000</td>
+</tr>
+<tr>
+<td><em>OverLoadCurrentLimit1</em></td>
+<td>Overload current limit of the Linky meter in A on phase 1</td>
+<td>Read</td>
+<td>Decimal</td>
+<td>From 0.0 to 99000.0</td>
+</tr>
+<tr>
+<td><em>OverLoadCurrentLimit2</em></td>
+<td>Overload current limit of the Linky meter in A on phase 2</td>
+<td>Read</td>
+<td>Decimal</td>
+<td>From 0.0 to 99000.0</td>
+</tr>
+<tr>
+<td><em>OverLoadCurrentLimit3</em></td>
+<td>Overload current limit of the Linky meter in A on phase 3</td>
+<td>Read</td>
+<td>Decimal</td>
+<td>From 0.0 to 99000.0</td>
+</tr>
+<tr>
+<td><em>RmsVoltage1</em></td>
+<td>RMS voltage at the Linky meter in V on phase 1</td>
+<td>Read</td>
+<td>Integer</td>
+<td>From 0 to 99999</td>
+</tr>
+<tr>
+<td><em>RmsVoltage2</em></td>
+<td>RMS voltage at the Linky meter in V on phase 2</td>
+<td>Read</td>
+<td>Integer</td>
+<td>From 0 to 99999</td>
+</tr>
+<tr>
+<td><em>RmsVoltage3</em></td>
+<td>RMS voltage at the Linky meter in V on phase 3</td>
+<td>Read</td>
+<td>Integer</td>
+<td>From 0 to 99999</td>
+</tr>
+<tr>
+<td><em>RmsCurrent1</em></td>
+<td>RMS current at the Linky meter in A imported on phase 1</td>
+<td>Read</td>
+<td>Decimal</td>
+<td>From 0.0 to 999.0</td>
+</tr>
+<tr>
+<td><em>RmsCurrent2</em></td>
+<td>RMS current at the Linky meter in A imported on phase 2</td>
+<td>Read</td>
+<td>Decimal</td>
+<td>From 0.0 to 999.0</td>
+</tr>
+<tr>
+<td><em>RmsCurrent3</em></td>
+<td>RMS current at the Linky meter in A imported on phase 3</td>
+<td>Read</td>
+<td>Decimal</td>
+<td>From 0.0 to 999.0</td>
+</tr>
+<tr>
+<td><em>ApparentImportPower</em></td>
+<td>Apparent import power at the Linky meter in VA across all phases</td>
+<td>Read</td>
+<td>Integer</td>
+<td>From 0 to 99999</td>
+</tr>
+<tr>
+<td><em>ApparentImportPower1</em></td>
+<td>Apparent import power at the Linky meter in VA on phase 1</td>
+<td>Read</td>
+<td>Integer</td>
+<td>From 0 to 99999</td>
+</tr>
+<tr>
+<td><em>ApparentImportPower2</em></td>
+<td>Apparent import power at the Linky meter in VA on phase 2</td>
+<td>Read</td>
+<td>Integer</td>
+<td>From 0 to 99999</td>
+</tr>
+<tr>
+<td><em>ApparentImportPower3</em></td>
+<td>Apparent import power at the Linky meter terminals in VA on phase 3</td>
+<td>Read</td>
+<td>Integer</td>
+<td>From 0 to 99999</td>
+</tr>
+<tr>
+<td><em>AvailableCurrent1</em></td>
+<td>Available RMS current at the Linky meter in A on phase 1</td>
+<td>Read</td>
+<td>Decimal</td>
+<td>From 0.0 to 99000.0</td>
+</tr>
+<tr>
+<td><em>AvailableCurrent2</em></td>
+<td>Available RMS current at the Linky meter in A on phase 2</td>
+<td>Read</td>
+<td>Decimal</td>
+<td>From 0.0 to 99000.0</td>
+</tr>
+<tr>
+<td><em>AvailableCurrent3</em></td>
+<td>Available RMS current at the Linky meter in A on phase 3</td>
+<td>Read</td>
+<td>Decimal</td>
+<td>From 0.0 to 99000.0</td>
+</tr>
+</tbody>
+</table>
+<h2 id="energy-manager-data-model">Energy Manager Data Model</h2>
+<h3 id="general-data">General Data</h3>
+<p>The general data of the energy manager are as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Mode</th>
+<th>Format</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>IsConnected</em></td>
+<td>EEBUS connection status</td>
+<td>Read</td>
+<td>Boolean</td>
+<td>- <strong>true</strong> if the EMS is connected with the charging station <br>- <strong>false</strong> otherwise</td>
+</tr>
+<tr>
+<td><em>HasMeterData</em></td>
+<td>Connection status with the Linky meter</td>
+<td>Read</td>
+<td>Boolean</td>
+<td>- <strong>true</strong> if the Linky meter data is being read <br>- <strong>false</strong> otherwise</td>
+</tr>
+<tr>
+<td><em>IsOpevSupported</em></td>
+<td>Compliance indicator with the OPEV use case of the EEBUS standard</td>
+<td>Read</td>
+<td>Boolean</td>
+<td>- <strong>true</strong> if the OPEV use case is supported <br>- <strong>false</strong> otherwise</td>
+</tr>
+</tbody>
+</table>
+<h3 id="electric-vehicle-charge-limitation-data-overloadprotection">Electric Vehicle Charge Limitation Data (OverloadProtection)</h3>
+<p>The charge limitation data of the energy manager are as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Mode</th>
+<th>Format</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>Active</em></td>
+<td>EV charge limitation activation status</td>
+<td>Read/Write</td>
+<td>Boolean</td>
+<td>- <strong>true</strong> if a limitation is applied <br>- <strong>false</strong> otherwise</td>
+</tr>
+<tr>
+<td><em>Value</em></td>
+<td>EV charge limitation value in A</td>
+<td>Read/Write</td>
+<td>Decimal</td>
+<td>From 0.0 to 32.0</td>
+</tr>
+<tr>
+<td><em>Start</em></td>
+<td>EV charge limitation start timestamp</td>
+<td>Read/Write</td>
+<td>Date in UTC format</td>
+<td>"2025-10-09T10:35:00+02:00"</td>
+</tr>
+<tr>
+<td><em>ResultCode</em></td>
+<td>Result code of the last EV charge limitation</td>
+<td>Read/Write</td>
+<td>Enumeration</td>
+<td>Values from <a href="#errornumbertype">ErrorNumberType</a></td>
+</tr>
+<tr>
+<td><em>ResultDescription</em></td>
+<td>Result description of the last EV charge limitation</td>
+<td>Read/Write</td>
+<td>String</td>
+<td>Detailed description of the charge limitation error</td>
+</tr>
+<tr>
+<td><em>LockActive</em></td>
+<td>EV charge limitation lock activation status</td>
+<td>Read/Write</td>
+<td>Boolean</td>
+<td>- <strong>true</strong> if the lock is active <br>- <strong>false</strong> otherwise</td>
+</tr>
+<tr>
+<td><em>LockStart</em></td>
+<td>EV charge limitation lock start timestamp</td>
+<td>Read/Write</td>
+<td>Date in UTC format</td>
+<td>"2025-10-09T10:35:00+02:00"</td>
+</tr>
+</tbody>
+</table>
+<h3 id="diagnostic-data-diagnosis">Diagnostic Data (Diagnosis)</h3>
+<p>The diagnostic data of the energy manager are as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Mode</th>
+<th>Format</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>OperatingState</em></td>
+<td>Operational state of the energy manager</td>
+<td>Read/Write</td>
+<td>Enumeration</td>
+<td>Values from <a href="#devicediagnosisoperatingstateenumtype">DeviceDiagnosisOperatingStateEnumType</a></td>
+</tr>
+<tr>
+<td><em>LastErrorCode</em></td>
+<td>Last error of the energy manager</td>
+<td>Read/Write</td>
+<td>String</td>
+<td>Detailed description of the manager error</td>
+</tr>
+</tbody>
+</table>
+<h2 id="charging-station-data-model-evse">Charging Station Data Model (EVSE)</h2>
+<p>The electric vehicle charging station provides us with the following data:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Mode</th>
+<th>Format</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>IsConnected</em></td>
+<td>Connection status with the charging station</td>
+<td>Read</td>
+<td>Boolean</td>
+<td>- <strong>true</strong> if the charging station is connected <br>- <strong>false</strong> otherwise</td>
+</tr>
+<tr>
+<td><em>OperatingState</em></td>
+<td>Operational state of the charging station</td>
+<td>Read</td>
+<td>Enumeration</td>
+<td>Values from <a href="#devicediagnosisoperatingstateenumtype">DeviceDiagnosisOperatingStateEnumType</a></td>
+</tr>
+<tr>
+<td><em>ManufacturerData</em></td>
+<td>Manufacturer data identifying the charging station</td>
+<td>Read</td>
+<td>Structure</td>
+<td>Values from <a href="#deviceclassificationmanufacturerdatatype">DeviceClassificationManufacturerDataType</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="electric-vehicle-ev-data-model">Electric Vehicle (EV) Data Model</h2>
+<p>The electric vehicle provides us with the following data:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Mode</th>
+<th>Format</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>IsConnected</em></td>
+<td>Connection status between the vehicle and the charging station</td>
+<td>Read</td>
+<td>Boolean</td>
+<td>- <strong>true</strong> if the vehicle is connected <br>- <strong>false</strong> otherwise</td>
+</tr>
+<tr>
+<td><em>ChargeState</em></td>
+<td>Vehicle charging status</td>
+<td>Read</td>
+<td>Enumeration</td>
+<td>- <strong>Unknown</strong> if the charging station's operational state is invalid <br>- <strong>unplugged</strong> if the charging station's operational state cannot be read <br>- <strong>active</strong> if the charging station is operating correctly <br>- <strong>paused</strong> if the charging station is in standby mode <br>- <strong>error</strong> if the charging station is in error <br>- <strong>finished</strong> if the charging station has completed its operations</td>
+</tr>
+<tr>
+<td><em>CommunicationStandard</em></td>
+<td>Communication protocol between the vehicle and the charging station</td>
+<td>Read</td>
+<td>Enumeration</td>
+<td>- <strong>iec61851</strong> for IEC 61850 protocol <br>- <strong>iso15118-2ed1</strong> for 15118-2 protocol first edition <br>- <strong>iso15118-2ed2</strong> for 15118-2 protocol second edition</td>
+</tr>
+<tr>
+<td><em>AsymmetricChargingSupport</em></td>
+<td>Indicates if charging with different currents per phase is possible</td>
+<td>Read</td>
+<td>Boolean</td>
+<td>- <strong>true</strong> if three-phase asymmetric charging is supported <br>- <strong>false</strong> otherwise</td>
+</tr>
+<tr>
+<td><em>Identifications</em></td>
+<td>Vehicle identifiers</td>
+<td>Read</td>
+<td>Array</td>
+<td>Array of structures containing: <br>- <strong>ValueType</strong> for the type (<a href="#identificationtypeenumtype">IdentificationTypeEnumType</a>) <br>- <strong>Value</strong> for the identifier as string</td>
+</tr>
+<tr>
+<td><em>ManufacturerData</em></td>
+<td>Vehicle manufacturer data</td>
+<td>Read</td>
+<td>Structure</td>
+<td>Values from <a href="#deviceclassificationmanufacturerdatatype">DeviceClassificationManufacturerDataType</a></td>
+</tr>
+<tr>
+<td><em>ChargingPowerLimits</em></td>
+<td>Vehicle power limitations</td>
+<td>Read</td>
+<td>Structure</td>
+<td>Structure containing decimal values: <br>- <strong>Min</strong> for minimum charging power <br>- <strong>Max</strong> for maximum charging power <br>- <strong>Standby</strong> for power in standby mode</td>
+</tr>
+<tr>
+<td><em>IsInSleepMode</em></td>
+<td>Vehicle sleep mode status</td>
+<td>Read</td>
+<td>Boolean</td>
+<td>- <strong>true</strong> if the charging station is in sleep mode <br>- <strong>false</strong> otherwise</td>
+</tr>
+<tr>
+<td><em>PhasesConnected</em></td>
+<td>Number of connected vehicle phases</td>
+<td>Read</td>
+<td>Integer</td>
+<td>1, 2, or 3 phases</td>
+</tr>
+<tr>
+<td><em>CurrentPerPhase</em></td>
+<td>Vehicle charging current measurement on each phase</td>
+<td>Read</td>
+<td>Array</td>
+<td>List of decimal values for each phase in Amperes</td>
+</tr>
+<tr>
+<td><em>PowerPerPhase</em></td>
+<td>Vehicle charging power measurement on each phase</td>
+<td>Read</td>
+<td>Array</td>
+<td>List of decimal values for each phase in Watts</td>
+</tr>
+<tr>
+<td><em>EnergyCharged</em></td>
+<td>Energy charged by the vehicle measurement</td>
+<td>Read</td>
+<td>Decimal</td>
+<td>Value in Watt-hours</td>
+</tr>
+<tr>
+<td><em>CurrentLimits</em></td>
+<td>Vehicle current limitations on each phase</td>
+<td>Read</td>
+<td>Structure</td>
+<td>Structure containing decimal values in Amperes: <br>- <strong>Min</strong> for the minimum current of each phase <br>- <strong>Max</strong> for the maximum current of each phase <br>- <strong>Default</strong> for the default current of each phase</td>
+</tr>
+<tr>
+<td><em>LoadControlLimits</em></td>
+<td>Vehicle charging current limitations on each phase</td>
+<td>Read/Write</td>
+<td>Array</td>
+<td>Array of structures containing the values: <br>- <strong>Phase</strong> to indicate the phase (<a href="#electricalconnectionphasenameenumtype">ElectricalConnectionPhaseNameEnumType</a>) <br>- <strong>IsChangeable</strong> to indicate if the limitation is modifiable (<strong>true</strong> / <strong>false</strong>) <br>- <strong>IsActive</strong> to indicate if the limitation is active (<strong>true</strong> / <strong>false</strong>) <br>- <strong>Value</strong> for the decimal current limitation in Amperes</td>
+</tr>
+</tbody>
+</table>
+<h2 id="eebus-data-model">EEBUS Data Model</h2>
+<h3 id="reference-documents">Reference Documents</h3>
+<p>The reference documents used for the data model are:</p>
+<ul>
+<li><a href="../../var/references/EEBus_SPINE_TS_ProtocolSpecification.pdf">EEBus_SPINE_TS_ProtocolSpecification.pdf</a></li>
+<li><a href="../../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf">EEBus_SPINE_TS_ResourceSpecification.pdf</a></li>
+</ul>
+<h3 id="errornumbertype">ErrorNumberType</h3>
+<p>The ErrorNumberType enumeration (see <a href="../../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf#page=71">Table 19</a>) indicates the type of error.</p>
+<p>It can take the following values:</p>
+<table>
+<thead>
+<tr>
+<th>Enumeration Value</th>
+<th>Enumeration Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>No Error</td>
+</tr>
+<tr>
+<td>1</td>
+<td>General Error</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Timeout</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Overload</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Destination unknown</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Destination unreachable</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Command not supported</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Command rejected</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Restricted function exchange combination not supported</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Binding is necessary for this command</td>
+</tr>
+</tbody>
+</table>
+<h3 id="devicediagnosisoperatingstateenumtype">DeviceDiagnosisOperatingStateEnumType</h3>
+<p>The DeviceDiagnosisOperatingStateEnumType enumeration (see <a href="../../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf#page=108">Table 45</a>) describes the operational state of the equipment.</p>
+<p>It can take the following values:</p>
+<table>
+<thead>
+<tr>
+<th>Enumeration Value</th>
+<th>Enumeration Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>normalOperation</em></td>
+<td>The device does its normal operation without any errors or limitations</td>
+</tr>
+<tr>
+<td><em>standby</em></td>
+<td>The device is in standby mode and does nothing but waiting for user interaction and listens on its communications protocol for external commands</td>
+</tr>
+<tr>
+<td><em>failure</em></td>
+<td>A failure occurred and the device cannot run as desired. Its normal functionality is likely not given</td>
+</tr>
+<tr>
+<td><em>serviceNeeded</em></td>
+<td>The device needs some kind of service. Possibly the normal functionality is not given</td>
+</tr>
+<tr>
+<td><em>overrideDetected</em></td>
+<td>The device detected an override. Normal operation may be given or the device is in some safe mode</td>
+</tr>
+<tr>
+<td><em>inAlarm</em></td>
+<td>An alarm (or emergency) occurred and user interaction is needed. Normal operation may be given or the device is in some safe mode</td>
+</tr>
+<tr>
+<td><em>notReachable</em></td>
+<td>The device has finished its temporary operation. As long as it remains in state finished, the normal operation is not given</td>
+</tr>
+<tr>
+<td><em>finished</em></td>
+<td>The equipment has temporarily completed its operations. As long as it remains in this state, it is not operating normally</td>
+</tr>
+<tr>
+<td><em>temporarilyNotReady</em></td>
+<td>The device is temporarily not ready for normal operation (e.g. due to maintenance)</td>
+</tr>
+<tr>
+<td><em>off</em></td>
+<td>The device is off. Hence, it cannot operate</td>
+</tr>
+</tbody>
+</table>
+<h3 id="deviceclassificationmanufacturerdatatype">DeviceClassificationManufacturerDataType</h3>
+<p>The DeviceClassificationManufacturerDataType data structure (see <a href="../../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf#page=301">§5.3.7.2</a>) identifies and describes equipment using the following fields:</p>
+<table>
+<thead>
+<tr>
+<th>Field Name</th>
+<th>Field Description</th>
+<th>Field Format</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>DeviceName</em></td>
+<td>Equipment name</td>
+<td>String</td>
+<td>"EVBox-Livo-EVB-500-021-302"</td>
+</tr>
+<tr>
+<td><em>DeviceCode</em></td>
+<td>Equipment code</td>
+<td>String</td>
+<td></td>
+</tr>
+<tr>
+<td><em>SerialNumber</em></td>
+<td>Serial number</td>
+<td>String</td>
+<td>"EVB-500-021-302"</td>
+</tr>
+<tr>
+<td><em>SoftwareRevision</em></td>
+<td>Software version</td>
+<td>String</td>
+<td></td>
+</tr>
+<tr>
+<td><em>HardwareRevision</em></td>
+<td>Hardware version</td>
+<td>String</td>
+<td></td>
+</tr>
+<tr>
+<td><em>VendorName</em></td>
+<td>Vendor name</td>
+<td>String</td>
+<td></td>
+</tr>
+<tr>
+<td><em>VendorCode</em></td>
+<td>Vendor code</td>
+<td>String</td>
+<td></td>
+</tr>
+<tr>
+<td><em>BrandName</em></td>
+<td>Brand name</td>
+<td>String</td>
+<td>"EVBox"</td>
+</tr>
+<tr>
+<td><em>PowerSource</em></td>
+<td>Power source</td>
+<td>String</td>
+<td></td>
+</tr>
+<tr>
+<td><em>ManufacturerNodeIdentification</em></td>
+<td>EEBUS node manufacturer identification</td>
+<td>String</td>
+<td></td>
+</tr>
+<tr>
+<td><em>ManufacturerLabel</em></td>
+<td>Manufacturer label</td>
+<td>String</td>
+<td></td>
+</tr>
+<tr>
+<td><em>ManufacturerDescription</em></td>
+<td>Manufacturer description</td>
+<td>String</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="identificationtypeenumtype">IdentificationTypeEnumType</h3>
+<p>The IdentificationTypeEnumType enumeration (see <a href="../../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf#page=348">Table 231</a>) describes the type of identifier.</p>
+<p>It can take the following values:</p>
+<table>
+<thead>
+<tr>
+<th>Enumeration Value</th>
+<th>Enumeration Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>eui48</em></td>
+<td>MAC address in EUI-48 format</td>
+</tr>
+<tr>
+<td><em>eui64</em></td>
+<td>MAC address in EUI-64 format</td>
+</tr>
+<tr>
+<td><em>userRfidTag</em></td>
+<td>RFID tag used for identification</td>
+</tr>
+</tbody>
+</table>
+<h3 id="electricalconnectionphasenameenumtype">ElectricalConnectionPhaseNameEnumType</h3>
+<p>The ElectricalConnectionPhaseNameEnumType enumeration (see <a href="../../var/references/EEBus_SPINE_TS_ResourceSpecification.pdf#page=324">Table 209</a>) indicates the measured phase(s).</p>
+<p>It can take the following values:</p>
+<table>
+<thead>
+<tr>
+<th>Enumeration Value</th>
+<th>Enumeration Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a</td>
+<td>Phase a (or L1)</td>
+</tr>
+<tr>
+<td>b</td>
+<td>Phase b (or L2)</td>
+</tr>
+<tr>
+<td>c</td>
+<td>Phase c (or L3)</td>
+</tr>
+<tr>
+<td>ab</td>
+<td>Phase a and b (or L1 and L2)</td>
+</tr>
+<tr>
+<td>bc</td>
+<td>Phase b and c (or L2 and L3)</td>
+</tr>
+<tr>
+<td>ac</td>
+<td>Phase a and c (or L1 and L3)</td>
+</tr>
+<tr>
+<td>abc</td>
+<td>Phase a, b and c (or L1, L2 and L3)</td>
+</tr>
+<tr>
+<td>neutral</td>
+<td>The neutral conductor of a connection</td>
+</tr>
+<tr>
+<td>ground</td>
+<td>The ground conductor of a connection</td>
+</tr>
+<tr>
+<td>none</td>
+<td>No phase specified or available</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.expand", "navigation.indexes", "toc.integrate"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+        <script src="../../assets/mkdocs_puml/puml.js"></script>
+      
+        <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+      
+        <script src="../../assets/mkdocs_puml/interaction.js"></script>
+      
+        <script src="../../assets/mkdocs_puml/puml.js"></script>
+      
+        <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+      
+        <script src="../../assets/mkdocs_puml/interaction.js"></script>
+      
+    
+  </body>
+</html>

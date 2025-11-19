@@ -1,0 +1,1347 @@
+
+<!doctype html>
+<html lang="fr" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation tic4eebus">
+      
+      
+      
+        <link rel="canonical" href="https://enedis-oss.github.io/tic4eebus/configuration/">
+      
+      
+        <link rel="prev" href="../installation/">
+      
+      
+        <link rel="next" href="../architecture/">
+      
+      
+        
+          <link rel="alternate" href="./" hreflang="fr">
+        
+          <link rel="alternate" href="../en/configuration/" hreflang="en">
+        
+      
+      
+      <link rel="icon" href="../var/images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>Configuration - tic4eebus</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.618322db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Ubuntu";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/mkdocs_puml/puml.css">
+    
+      <link rel="stylesheet" href="../assets/mkdocs_puml/interaction.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#configuration" class="md-skip">
+          Aller au contenu
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="En-tête">
+    <a href=".." title="tic4eebus" class="md-header__button md-logo" aria-label="tic4eebus" data-md-component="logo">
+      
+  <img src="../var/images/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            tic4eebus
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Configuration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Sélectionner la langue">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../en/configuration/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Rechercher" placeholder="Rechercher" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Recherche">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Effacer" aria-label="Effacer" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initialisation de la recherche
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Enedis-OSS/tic4eebus" title="Aller au dépôt" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Enedis-OSS/tic4eebus
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="tic4eebus" class="md-nav__button md-logo" aria-label="tic4eebus" data-md-component="logo">
+      
+  <img src="../var/images/logo.png" alt="logo">
+
+    </a>
+    tic4eebus
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Enedis-OSS/tic4eebus" title="Aller au dépôt" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Enedis-OSS/tic4eebus
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vue d'ensemble
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table des matières">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table des matières
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Introduction
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Description
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Description">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#protection-des-surcharges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Protection des surcharges
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Protection des surcharges">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#limitation-de-courant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitation de courant
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vehicule-electrique" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Véhicule électrique
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#borne-de-recharge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Borne de recharge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#journalisation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Journalisation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modele-de-donnees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modèle de données
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Modèle de données">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fichier-csv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fichier CSV
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#base-de-donnees-influxdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Base de données InfluxDB
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tele-information-client-tic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Télé information client (TIC)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Télé information client (TIC)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tic2websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tic2Websocket
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ticidentifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TicIdentifier
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#protocole-eebus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Protocole EEBUS
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Types
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#niveau-de-journalisation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Niveau de journalisation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rotation-des-fichiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rotation des fichiers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exemple" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exemple
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture logicielle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data_model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modèle de données
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!--
+  ~ Copyright (C) 2025 Enedis Smarties team <dt-dsi-nexus-lab-smarties@enedis.fr>
+  ~ 
+  ~ SPDX-FileContributor: Jehan BOUSCH
+  ~ 
+  ~ SPDX-License-Identifier: Apache-2.0
+-->
+
+<h1 id="configuration">Configuration</h1>
+<h2 id="introduction">Introduction</h2>
+<p>La configuration de l'application <strong>tic4eebus</strong> est organisée en 7 parties :</p>
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Description</th>
+<th>Format</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>OverloadProtection</em></td>
+<td>Paramètres de protection des surcharges</td>
+<td>Structure</td>
+<td>Valeurs des <a href="#protection-des-surcharges">protection des surcharges</a></td>
+</tr>
+<tr>
+<td><em>Vehicle</em></td>
+<td>Paramètres du véhicule électrique</td>
+<td>Structure</td>
+<td>Valeurs du <a href="#vehicule-electrique">véhicule électrique</a></td>
+</tr>
+<tr>
+<td><em>Wallbox</em></td>
+<td>Paramètres du borne de recharge</td>
+<td>Structure</td>
+<td>Valeurs de la <a href="#borne-de-recharge">borne de recharge</a></td>
+</tr>
+<tr>
+<td><em>Log</em></td>
+<td>Paramètres de journalisation</td>
+<td>Structure</td>
+<td>Valeurs des <a href="#journalisation">paramètres de journalisation</a></td>
+</tr>
+<tr>
+<td><em>DataModel</em></td>
+<td>Paramètres du modèle de données</td>
+<td>Structure</td>
+<td>Valeurs du <a href="#modele-de-donnees">modèle de données</a></td>
+</tr>
+<tr>
+<td><em>TeleInformationClient</em></td>
+<td>Paramètres de la télé information client (TIC)</td>
+<td>Structure</td>
+<td>Valeurs de la <a href="#tele-information-client-tic">TIC</a></td>
+</tr>
+<tr>
+<td><em>Eebus</em></td>
+<td>Paramètres de protocole EEBUS</td>
+<td>Structure</td>
+<td>Valeurs du <a href="#protocole-eebus">protocole EEBUS</a></td>
+</tr>
+</tbody>
+</table>
+<p>Chaque partie ci-dessus est stockée dans le fichier de configuration au format YAML.</p>
+<p>Le fichier de configuration est chargé au démarrage de l'application avec le chemin par défaut "<em>examples/config.yaml</em>".</p>
+<p>Ce chemin du fichier de configuration est modifiable par la ligne de commande de l'application avec l'argument "<em>configFilePath</em>".</p>
+<h2 id="description">Description</h2>
+<h3 id="protection-des-surcharges">Protection des surcharges</h3>
+<p>La configuration de la protection des surcharges comporte les paramètres suivants :</p>
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Description</th>
+<th>Format</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>Enable</em></td>
+<td>Activation de l'algorithme</td>
+<td>Booléen</td>
+<td>- <strong>true</strong> si l'algorithme est actif <br>- <strong>false</strong> sinon</td>
+</tr>
+<tr>
+<td><em>RunningPeriodInSeconds</em></td>
+<td>Période d'exécution de l'algorithme en secondes</td>
+<td>Entier</td>
+<td>De 0 à 2^31 - 1</td>
+</tr>
+<tr>
+<td><em>CurrentLimit</em></td>
+<td>Paramètres liés à la limitation de courant</td>
+<td>Structure</td>
+<td>Valeurs de la <a href="#limitation-de-courant">limitation de courant</a></td>
+</tr>
+</tbody>
+</table>
+<h4 id="limitation-de-courant">Limitation de courant</h4>
+<p>La configuration des paramètres de limitation de courant de la protection des surcharges comporte les champ suivants :</p>
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Description</th>
+<th>Format</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>ValueInAmps</em></td>
+<td>Limitation du courant de charge du VE en Ampère</td>
+<td>Décimal</td>
+<td>De 0.0 à 1.79 × 10^308</td>
+</tr>
+<tr>
+<td><em>LockDelayInSeconds</em></td>
+<td>Durée de verrouillage de la limitation en secondes</td>
+<td>Décimal</td>
+<td>De 0 à 1.79 × 10^308</td>
+</tr>
+</tbody>
+</table>
+<p><u>Remarques:</u></p>
+<ul>
+<li>La limitation du courant de charge du VE (<em>ValueInAmps</em>) est utilisé uniquement si l'algorithme de protection des surcharges est inactif (<em>Enable</em>=<strong>false</strong>)</li>
+<li>La durée de verrouiullage de la limitation (<em>LockDelayInSeconds</em>) n'est utilisé que si l'algorithme de protection des surcharges est actif (<em>Enable</em>=<strong>true</strong>)</li>
+</ul>
+<h3 id="vehicule-electrique">Véhicule électrique</h3>
+<p>La configuration des paramètres liés au véhicule électrique comporte les champs suivants :</p>
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Description</th>
+<th>Format</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>UpdateDataPeriodInSeconds</em></td>
+<td>Période de mise à jour des données de VE en secondes</td>
+<td>Entier</td>
+<td>De 0 à 2^31 - 1 <br> 0 signifie pas de mise à jour périodique</td>
+</tr>
+<tr>
+<td><em>DataPersistent</em></td>
+<td>Indicateur de persistence des données du VE</td>
+<td>Booléen</td>
+<td>- <strong>true</strong> si les données sont persistantes <br>- <strong>false</strong> sinon</td>
+</tr>
+</tbody>
+</table>
+<h3 id="borne-de-recharge">Borne de recharge</h3>
+<p>La configuration des paramètres liés à la borne de recharge comporte les champs suivants :</p>
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Description</th>
+<th>Format</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>UpdateDataPeriodInSeconds</em></td>
+<td>Période de mise à jour des données de la borne en secondes</td>
+<td>Entier</td>
+<td>De 0 à 2^31 - 1 <br> 0 signifie pas de mise à jour périodique</td>
+</tr>
+<tr>
+<td><em>DataPersistent</em></td>
+<td>Indicateur de persistence des données de la borne</td>
+<td>Booléen</td>
+<td>- <strong>true</strong> si les données sont persistantes <br>- <strong>false</strong> sinon</td>
+</tr>
+</tbody>
+</table>
+<h3 id="journalisation">Journalisation</h3>
+<p>La configuration des paramètres de journalisation comporte les champs suivants :</p>
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Description</th>
+<th>Format</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>Level</em></td>
+<td>Niveau de journalisation utilisé</td>
+<td>Énumération</td>
+<td>Valeurs de <a href="#niveau-de-journalisation">niveau de journalisation</a></td>
+</tr>
+<tr>
+<td><em>FilePath</em></td>
+<td>Chemin d'accès du fichier de journalisation</td>
+<td>Chaine de caractères</td>
+<td>Exemple : "var/log/tic4eebus.log"</td>
+</tr>
+<tr>
+<td><em>Rotation</em></td>
+<td>Paramètres de rotation des fichiers de journalisation</td>
+<td>Structure</td>
+<td>Valeurs de <a href="#rotation-des-fichiers">rotation de fichier</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="modele-de-donnees">Modèle de données</h3>
+<p>La configuration des paramètres du modèle de données comporte les champs suivants :</p>
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Description</th>
+<th>Format</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>Csv</em></td>
+<td>Paramètres du fichier CSV</td>
+<td>Structure</td>
+<td>Valeurs du <a href="#fichier-csv">fichier CSV</a></td>
+</tr>
+<tr>
+<td><em>InfluxDb</em></td>
+<td>Paramètres de la base de données InfluxDB</td>
+<td>Structure</td>
+<td>Valeurs de <a href="#base-de-donnees-influxdb">la base de données InfluxDB</a></td>
+</tr>
+</tbody>
+</table>
+<p><u>Remarques:</u></p>
+<p>Les champs <em>Csv</em> et <em>InfluxDb</em> sont optionnels.
+Si le champs <em>Csv</em> n'existe pas, il n'y a pas de fichier CSV.
+Si le champs <em>InfluxDb</em> n'existe pas, la base de données InfluxDB n'est pas alimentée.</p>
+<h4 id="fichier-csv">Fichier CSV</h4>
+<p>La configuration des paramètres du fichier CSV comporte les champs suivants :</p>
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Description</th>
+<th>Format</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>FilePath</em></td>
+<td>Chemin d'accès du fichier CSV</td>
+<td>Chaine de caractères</td>
+<td>Exemple : "var/data/DataModel.csv"</td>
+</tr>
+<tr>
+<td><em>Rotation</em></td>
+<td>Paramètres de rotation des fichiers CSV</td>
+<td>Structure</td>
+<td>Valeurs de <a href="#rotation-des-fichiers">rotation de fichier</a></td>
+</tr>
+</tbody>
+</table>
+<h4 id="base-de-donnees-influxdb">Base de données InfluxDB</h4>
+<p>La configuration des paramètres de la base de données InfluxDB comporte les champs suivants :</p>
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Description</th>
+<th>Format</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>Bucket</em></td>
+<td>Nom de la base (appelée bucket) InfluxDB</td>
+<td>Chaine de caractères</td>
+<td>Exemple : "demo-bucket"</td>
+</tr>
+<tr>
+<td><em>Org</em></td>
+<td>Nom de l'organisation associée à la base et aux tables (appelées measurment)</td>
+<td>Chaine de caractères</td>
+<td>Exemple : "demo-org"</td>
+</tr>
+<tr>
+<td><em>Token</em></td>
+<td>Clef d'authentification utilisée pour la dconnexion à la base</td>
+<td>Chaine de caractères</td>
+<td>Exemple: "He_nwgoqXu4XggIzaiUWFHALKnS5JskdTLzGlSYeJMNkjCD-pyR6Yc5Hvl8NWj5Qo5C80mLvuJAS1IuqOcq4GQZZ"</td>
+</tr>
+<tr>
+<td><em>IpAddress</em></td>
+<td>Adresse IP du serveur hébergeant la base de données InfluxDB</td>
+<td>Chaine de caractères</td>
+<td>Exemple : "127.0.0.1"</td>
+</tr>
+<tr>
+<td><em>TcpPort</em></td>
+<td>Port TCP du serveur hébergeant la base de données InfluxDB</td>
+<td>Entier</td>
+<td>De 1 à 65535</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tele-information-client-tic">Télé information client (TIC)</h3>
+<p>La configuration des paramètres de la télé information client comporte les champs suivants :</p>
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Description</th>
+<th>Format</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>Tic2Websocket</em></td>
+<td>Paramètres du client TIC2WebSocket</td>
+<td>Structure</td>
+<td>Valeurs de <a href="#tic2websocket">Tic2WebSocket</a></td>
+</tr>
+<tr>
+<td><em>TicIdentifier</em></td>
+<td>Paramètres d'identification du compteur Linky</td>
+<td>Structure</td>
+<td>Valeurs de <a href="#ticidentifier">TicIdentifier</a></td>
+</tr>
+</tbody>
+</table>
+<h4 id="tic2websocket">Tic2Websocket</h4>
+<p>La configuration des paramètres du client Tic2Websocket comporte les champs suivants :</p>
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Description</th>
+<th>Format</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>IpAddress</em></td>
+<td>Adresse IP du serveur hébergeant l'application Tic2Websocket</td>
+<td>Chaine de caractères</td>
+<td>Exemple : "127.0.0.1"</td>
+</tr>
+<tr>
+<td><em>TcpPort</em></td>
+<td>Port TCP du serveur hébergeant l'application Tic2Websocket</td>
+<td>Entier</td>
+<td>De 1 à 65535</td>
+</tr>
+</tbody>
+</table>
+<h4 id="ticidentifier">TicIdentifier</h4>
+<p>La configuration des paramètres d'identification du compteur Linky comporte les champs suivants :</p>
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Description</th>
+<th>Format</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>SerialNumber</em></td>
+<td>Numéro de série du compteur Linky</td>
+<td>Chaine de 12 caractères</td>
+<td>Exemple: "041976216986"</td>
+</tr>
+</tbody>
+</table>
+<p><u>Remarque:</u></p>
+<p>Si le champs <em>SerialNumber</em> est vide alors l'application utilisera le premier numéro de série fournit pas l'application <em>Tic2Websocket</em>.</p>
+<h3 id="protocole-eebus">Protocole EEBUS</h3>
+<p>La configuration des paramètres du protocole EEBUS comporte les champs suivants :</p>
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Description</th>
+<th>Format</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>ServerPort</em></td>
+<td>Port TCP du serveur EEBUS de la borne de recharge</td>
+<td>Entier</td>
+<td>De 1 à 65535</td>
+</tr>
+<tr>
+<td><em>RemoteSki</em></td>
+<td>Clef d'identification du serveur EEBUS de la borne de recharge</td>
+<td>Chaine de 40 caractères hexadécimaux</td>
+<td>Exemple : "50abfe7714d034b8b15e488b91831047657b9ff2"</td>
+</tr>
+<tr>
+<td><em>CertificateFilePath</em></td>
+<td>Chemin du certificat de sécurité du gestionnaire d'énergie</td>
+<td>Chaine de caractères</td>
+<td>Exemple : "examples/energy-guard.cert"</td>
+</tr>
+<tr>
+<td><em>PrivateKeyFilePath</em></td>
+<td>Clef privée de chiffrement du gestionnaire d'énergie</td>
+<td>Chaine de caractères</td>
+<td>Exemple : "examples/energy-guard.key"</td>
+</tr>
+<tr>
+<td><em>VendorCode</em></td>
+<td>Code d'identification de l'entrepise du gestionnaire d'énergie conforme <a href="https://www.iana.org/assignments/enterprise-numbers/">IANA PEN</a></td>
+<td>Chaine de caractères</td>
+<td>Exemple : "i:54076"</td>
+</tr>
+<tr>
+<td><em>DeviceBrand</em></td>
+<td>Nom de la marque du gestionnaire d'énergie</td>
+<td>Chaine de caractères</td>
+<td>Exemple : "Enedis"</td>
+</tr>
+<tr>
+<td><em>DeviceModel</em></td>
+<td>Nom du modèle du gestionnaire d'énergie</td>
+<td>Chaine de caractères</td>
+<td>Exemple : "PAC"</td>
+</tr>
+<tr>
+<td><em>SerialNumber</em></td>
+<td>Numéro de série du gestionnaire d'énergie</td>
+<td>Chaine de caractères</td>
+<td>Exemple : "12345678"</td>
+</tr>
+<tr>
+<td><em>HeartbeatTimeoutInSeconds</em></td>
+<td>Délai max imparti pour l'envoi de <a href="../var/references/EEBus_UC_TS_OverloadProtectionByEVChargingCurrentCurtailment_V1.0.1b.pdf#page=34">heartbeat EEBUS</a> à la borne de recharge</td>
+<td>Entier</td>
+<td>De 0 à 2^32 -1</td>
+</tr>
+</tbody>
+</table>
+<p><u>Remarque:</u></p>
+<p>Si le paramètre <em>HeartbeatTimeoutInSeconds</em> est configuré avec une valeur supérieur à 4 secondes, la borne de recharge, conformément au <a href="../var/references/EEBus_UC_TS_OverloadProtectionByEVChargingCurrentCurtailment_V1.0.1b.pdf#page=45">scénario 2 du cas d'utilisation OPEV</a>, considère que le gestionnaire d'énergie n'est pas disponible et configure la limitation de charge à sa valeur minimale.</p>
+<h2 id="types">Types</h2>
+<h3 id="niveau-de-journalisation">Niveau de journalisation</h3>
+<p>Le niveau de journalisation permet de définir le seuil minimum des informations à conserver dans les journaux de bord.</p>
+<p>Il peut prendre les valeurs suivantes classées ordre décroissant de gravité :</p>
+<table>
+<thead>
+<tr>
+<th>Valeur de l'énumération</th>
+<th>Description de l'énumération</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>panic</em></td>
+<td>Niveau de gravité le plus élevé. Effectue la journalisation puis appelle <a href="https://go.dev/blog/defer-panic-and-recover">panic()</a>.</td>
+</tr>
+<tr>
+<td><em>fatal</em></td>
+<td>Niveau de gravité critique. Effectue la journalisation puis quitte le programme.</td>
+</tr>
+<tr>
+<td><em>error</em></td>
+<td>Niveau utilisé pour les erreurs qui doivent absolument être signalées.</td>
+</tr>
+<tr>
+<td><em>warn</em></td>
+<td>Niveau pour les informations non critiques mais qui méritent une attention particulière</td>
+</tr>
+<tr>
+<td><em>info</em></td>
+<td>Niveau pour les informations générales décrivant le fonctionnement courant de l’application.</td>
+</tr>
+<tr>
+<td><em>debug</em></td>
+<td>Niveau généralement activé uniquement pour le débogage. Journalisation très détaillée.</td>
+</tr>
+<tr>
+<td><em>trace</em></td>
+<td>Niveau qui désigne des événements informationnels encore plus détaillés que <em>debug</em></td>
+</tr>
+</tbody>
+</table>
+<h3 id="rotation-des-fichiers">Rotation des fichiers</h3>
+<p>La rotation des fichiers comporte les champs suivants :</p>
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Description</th>
+<th>Format</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>PeriodInHours</em></td>
+<td>Durée d'une période de rotation en nombre d'heures</td>
+<td>Entier</td>
+<td>De 0 à 2^31 - 1</td>
+</tr>
+<tr>
+<td><em>PeriodCount</em></td>
+<td>Nombre de rotation max</td>
+<td>Entier</td>
+<td>De 0 à 2^31 - 1</td>
+</tr>
+<tr>
+<td><em>PeriodPattern</em></td>
+<td>Motif utilisé pour le nom du fichier à chaque nouvelle rotation</td>
+<td>Chaine de caractères</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="exemple">Exemple</h2>
+<p>Voici un exemple complet du <a href="../var/examples/config.yaml">fichier de configuration</a> par défaut au format YAML :</p>
+<pre><code class="language-yaml"># Configuration de la protection des surcharges
+OverloadProtection:
+  Enable : true
+  RunningPeriodInSeconds : 1
+  CurrentLimit :
+    ValueInAmps : 16.0 # Utilisé uniquement si Enable = false
+    LockDelayInSeconds : 10.0 # Utilisé uniquement si Enable = true
+
+# Configuration du véhicle électrique
+Vehicle:
+  UpdateDataPeriodInSeconds : 5 # Inutilisé si la valeur vaut 0
+  DataPersistent: false
+
+# Configuration de la borne de recharge
+Wallbox:
+  UpdateDataPeriodInSeconds : 5 # Inutilisé si la valeur vaut 0
+  DataPersistent: false
+
+# Configuration de la journalisation
+Log:
+  Level : &quot;trace&quot; # Niveaux disponibles : panic,fatal,error,warn,info,debug,trace
+  FilePath : &quot;var/log/tic4eebus.log&quot;
+  Rotation:
+    PeriodInHours : 24 # Chaque jour un nouveau journal de bord est créé
+    PeriodCount : 15 # 15 journaux de bord créés au maximum (15 jours d'historique)
+    PeriodPattern: &quot;-%Y-%m-%d&quot; # Chaque journal de bord contient dans son nom sa date de création avec le motif année-mois-jour
+
+# Configuration du modèle de données
+DataModel:
+  # Configuration du fichier CSV (optionnel)
+  Csv: # Si ce paramètre est fournit tous ces champs doivent être renseignés
+    FilePath : &quot;var/data/EnergyGuardDataModel.csv&quot;
+    Rotation:
+      PeriodInHours : 24 # Chaque jour un nouveau fichier CSV est créé
+      PeriodCount : 7 # 7 fichiers CSV créés au maximum (7 jours d'historique)
+      PeriodPattern: &quot;-%Y-%m-%d&quot; # Chaque fichier CSV contient dans son nom sa date de création avec le motif année-mois-jour
+
+  # Configuration de la base de données InfluxDB (optionnel)
+  InfluxDb: # Si ce paramètre est fournit tous ces champs doivent être renseignés
+    Bucket : &quot;demo-bucket&quot;
+    Org : &quot;demo-org&quot;
+    Token : &quot;${TIC4EEBUS_INFLUXDB_TOKEN}&quot; # Exemple: &quot;He_nwgoqXu4XggIzaiUWFHALKnS5JskdTLzGlSYeJMNkjCD-pyR6Yc5Hvl8NWj5Qo5C80mLvuJAS1IuqOcq4GQZZ&quot;
+    IpAddress : &quot;127.0.0.1&quot;
+    TcpPort : 8086
+
+# Configuration de la téle information client (TIC)
+TeleInformationClient:
+  Tic2Websocket:
+    IpAddress : &quot;127.0.0.1&quot;
+    TcpPort : 19584
+  TicIdentifier:
+    SerialNumber : &quot;&quot; # Le numéro de série doit être spécifié si TIC2WebSocket gère plusieurs modems
+
+# Configuration du protocole EEBUS
+Eebus:
+  ServerPort : 4817
+  RemoteSki : &quot;${TIC4EEBUS_REMOTE_SKI}&quot; # Exemple: &quot;50abfe7714d034b8b15e488b91831047657b9ff2&quot;
+  CertificateFilePath : &quot;examples/energy-guard.cert&quot;
+  PrivateKeyFilePath : &quot;examples/energy-guard.key&quot;
+  VendorCode : &quot;i:54076&quot;
+  DeviceBrand : &quot;Enedis&quot;
+  DeviceModel : &quot;PAC&quot;
+  SerialNumber : &quot;12345678&quot;
+  HeartbeatTimeoutInSeconds : 2
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.indexes", "toc.integrate"], "search": "../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+        <script src="../assets/mkdocs_puml/puml.js"></script>
+      
+        <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+      
+        <script src="../assets/mkdocs_puml/interaction.js"></script>
+      
+    
+  </body>
+</html>
