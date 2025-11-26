@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2025 Enedis Smarties team <dt-dsi-nexus-lab-smarties@enedis.fr>
+# SPDX-FileContributor: Jehan BOUSCH
+#
+# SPDX-License-Identifier: Apache-2.0
+
+services:
+  mkdocs:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/docs
+      - ../.git:/docs/.git:rw
+      - ~/.gitconfig:/root/.gitconfig:ro
+      - ~/.ssh:/root/.ssh:ro
+      - ~/.ssh/known_hosts:/root/.ssh/known_hosts:rw
+    depends_on:
+      - plantuml
+    environment:
+      - PLANTUML_SERVER=http://localhost:8080
+
+  plantuml:
+    image: plantuml/plantuml-server:jetty
+    ports:
+      - "8080:8080"

@@ -6,22 +6,22 @@
   ~ 
   ~ SPDX-License-Identifier: Apache-2.0
 -->
-# Changelog
+# Journal des modifications
 
 [🇫🇷 Français](CHANGELOG.fr.md) | [🇺🇸 English](CHANGELOG.md)
 
 ## [v1.1.0](https://github.com/Enedis-OSS/tic4eebus/tree/v1.1.0)
-### ✨ New features:
-* Write data model to InfluxDB for Grafana visualization
-### 🔧 Technical enhancements:
-* Optional configuration for data model (CSV file, InfluxDB)
+### ✨ Nouvelles fonctionnalités:
+* Écriture du modèle de données vers InfluxDB pour la visualisation avec Grafana
+### 🔧 Améliorations techniques:
+* Configuration optionnelle pour le modèle de données (fichier CSV, InfluxDB)
 
 ## [v1.0.0](https://github.com/Enedis-OSS/tic4eebus/tree/v1.0.0)
-### ✨ New features:
-* EEBUS OPEV use case (scenario 1) : Energy Guard curtails charging current of EV
-* EEBUS OPEV use case (scenario 2) : EV checks Energy Guard availability
-* EEBUS OPEV use case (scenario 3) : Energy Guard sends error state
-* Configuration file wit settings for Overload protection, VE, log, data model, TIC Linky meter, EEBUS
-* Log file with rotation
-* Command line parser with help, version and configuration file path
-* Data model exported as CSV file with rotation
+### ✨ Nouvelles fonctionnalités :
+* Cas d'utilisation OPEV EEBUS (scénario 1) : Le gestionnaire d'énergie limite le courant de charge du VE
+* Cas d'utilisation OPEV EEBUS (scénario 2) : Le VE vérifie la disponibilité du gestionnaire d'énergie
+* Cas d'utilisation OPEV EEBUS (scénario 3) : Le gestionnaire d'énergie envoie un état d'erreur
+* Fichier de configuration avec paramètres pour la protection contre les surcharges, VE, logs, modèle de données, télé-information client compteur Linky, EEBUS
+* Fichier de log avec rotation
+* Interpréteur de ligne de commande avec aide, version et chemin du fichier de configuration
+* Modèle de données exporté en fichier CSV avec rotation

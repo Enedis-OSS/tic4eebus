@@ -1,0 +1,70 @@
+# SPDX-FileCopyrightText: 2025 Enedis Smarties team <dt-dsi-nexus-lab-smarties@enedis.fr>
+# SPDX-FileContributor: Jehan BOUSCH
+# SPDX-FileContributor: Mathieu SABARTHES
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Overload protection configuration
+OverloadProtection:
+  Enable : true
+  RunningPeriodInSeconds : 1
+  CurrentLimit :
+    ValueInAmps : 16.0 # Used only if Enable is false
+    LockDelayInSeconds : 10.0 # Used only if Enable is true
+
+# Vehicle configuration
+Vehicle:
+  UpdateDataPeriodInSeconds : 5 # Unused if 0
+  DataPersistent: false
+
+# Wallbox configuration
+Wallbox:
+  UpdateDataPeriodInSeconds : 5 # Unused if 0
+  DataPersistent: false
+
+# Log configuration
+Log:
+  Level : "trace" # Available levels : panic,fatal,error,warn,info,debug,trace
+  FilePath : "var/log/tic4eebus.log"
+  Rotation:
+    PeriodInHours : 24 # Each day a new file is created
+    PeriodCount : 15 # 15 files maximum are created (15 days of logs)
+    PeriodPattern: "-%Y-%m-%d" # Each log file name contains the year-month-day of creation
+
+# Data model configuration
+DataModel:
+  # Csv file configuration (optional)
+  Csv: # If provided all fields must be provided
+    FilePath : "var/data/EnergyGuardDataModel.csv"
+    Rotation:
+      PeriodInHours : 24 # Each day a new file is created
+      PeriodCount : 7 # 7 files maximum are created (7 days of data model)
+      PeriodPattern: "-%Y-%m-%d" # Each csv file name contains the year-month-day of creation
+
+  # InfluxDB configuration (optional)
+  InfluxDb: # If provided all fields must be provided
+    Bucket : "demo-bucket"
+    Org : "demo-org"
+    Token : "${TIC4EEBUS_INFLUXDB_TOKEN}" # Example: "He_nwgoqXu4XggIzaiUWFHALKnS5JskdTLzGlSYeJMNkjCD-pyR6Yc5Hvl8NWj5Qo5C80mLvuJAS1IuqOcq4GQZZ"
+    IpAddress : "127.0.0.1"
+    TcpPort : 8086
+
+# Tele information client (TIC) configuration
+TeleInformationClient:
+  Tic2Websocket:
+    IpAddress : "127.0.0.1"
+    TcpPort : 19584
+  TicIdentifier:
+    SerialNumber : "" # Meter serial number should only be specified if TIC2Websocket handles multiple modems
+
+# EEBUS configuration
+Eebus:
+  ServerPort : 4817
+  RemoteSki : "${TIC4EEBUS_REMOTE_SKI}" # Example: "50abfe7714d034b8b15e488b91831047657b9ff2"
+  CertificateFilePath : "examples/energy-guard.cert"
+  PrivateKeyFilePath : "examples/energy-guard.key"
+  VendorCode : "i:54076"
+  DeviceBrand : "Enedis"
+  DeviceModel : "PAC"
+  SerialNumber : "12345678"
+  HeartbeatTimeoutInSeconds : 2
