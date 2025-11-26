@@ -74,7 +74,7 @@ Ajoutez l'option `--version` pour afficher la version de l'application.
 
 ## <a name="documentation"></a> Documentation
 
-[A faire]
+Pour plus d'informations sur le fonctionnement de tic4eebus, consultez la [documentation officielle](https://enedis-oss.github.io/tic4eebus/).
 
 ## <a name="contrib"></a> Contribuer ?
 

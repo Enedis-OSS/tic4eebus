@@ -10,10 +10,14 @@ services:
       - "8000:8000"
     volumes:
       - .:/docs
+      - ../.git:/docs/.git:rw
+      - ~/.gitconfig:/root/.gitconfig:ro
+      - ~/.ssh:/root/.ssh:ro
+      - ~/.ssh/known_hosts:/root/.ssh/known_hosts:rw
     depends_on:
       - plantuml
     environment:
-      - PLANTUML_SERVER=http://plantuml:8080
+      - PLANTUML_SERVER=http://localhost:8080
 
   plantuml:
     image: plantuml/plantuml-server:jetty

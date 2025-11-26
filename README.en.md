@@ -74,7 +74,7 @@ Add `--version` option to display the application version.
 
 ## <a name="documentation"></a> Documentation
 
-[TODO]
+Get the [official documentation](https://enedis-oss.github.io/tic4eebus/) for more information about how tic4eebus works.
 
 ## <a name="contrib"></a> Contributing ?
 

@@ -12,10 +12,8 @@ repo_url: https://github.com/Enedis-OSS/tic4eebus
 # Multilingual configuration
 plugins:
   - plantuml:
-        #puml_url: https://www.plantuml.com/plantuml/
         puml_url: http://plantuml:8080
         puml_keyword: plantuml
-        output_format: svg
         theme:
           enabled: true
           light: default/light
@@ -33,7 +31,6 @@ plugins:
           build: true
           nav_translations:
             Overview: Vue d'ensemble
-            Installation: Installation
             Configuration: Configuration
             Architecture: Architecture logicielle
             Model : Modèle de données
@@ -42,7 +39,6 @@ plugins:
           build: true
           nav_translations:
             Overview: Overview
-            Installation: Installation
             Configuration: Configuration
             Architecture: Software Architecture
             Model : Data Model
@@ -50,7 +46,6 @@ plugins:
 # Site navigation
 nav:
   - Overview: index.md
-  - Installation: installation.md
   - Configuration: configuration.md
   - Architecture: architecture.md
   - Model: data_model.md

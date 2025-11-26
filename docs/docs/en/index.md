@@ -30,7 +30,6 @@ the circuit breaker upstream of the electrical installation from tripping, can b
 
 The purpose of this documentation is to provide the necessary information for users, developers, and contributors to the project:
 
-- [Installation](installation.md)
 - [Configuration](configuration.md)
 - [Software Architecture](architecture.md)
 - [Data Model](data_model.md)

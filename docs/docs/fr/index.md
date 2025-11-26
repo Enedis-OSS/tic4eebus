@@ -29,7 +29,6 @@ le déclechement du disjoncteur en amont de l'installation électrique est tél�
 
 L'objectif de cette documentation est de fournir les informations nécessaires aux utilisateurs, aux développeurs et aux contributeurs du projet :
 
-- [Installation](installation.md)
 - [Configuration](configuration.md)
 - [Architecture logicielle](architecture.md)
 - [Modèle de données](data_model.md)
