@@ -166,7 +166,13 @@ func NewCsvWriter(config *config.CsvConfig) *CsvWriter {
 			if e.Type() != rotatelogs.FileRotatedEventType {
 				return
 			}
-			writeHeaders((e.(*rotatelogs.FileRotatedEvent).CurrentFile()))
+			fileName := (e.(*rotatelogs.FileRotatedEvent).CurrentFile())
+			fileInfo, err := os.Stat(fileName)
+			// If file exists and is not empty, do not rotate (handle restart case)
+			if err == nil && fileInfo.Size() > 0 {
+				return
+			}
+			writeHeaders(fileName)
 		})),
 	)
 	handler.logger.SetFormatter(&formatter{
