@@ -34,6 +34,7 @@ plugins:
             Configuration: Configuration
             Architecture: Architecture logicielle
             Model : Modèle de données
+            Code: Code source
         - locale: en
           name: English
           build: true
@@ -42,6 +43,7 @@ plugins:
             Configuration: Configuration
             Architecture: Software Architecture
             Model : Data Model
+            Code: Source Code
 
 # Site navigation
 nav:
@@ -49,6 +51,7 @@ nav:
   - Configuration: configuration.md
   - Architecture: architecture.md
   - Model: data_model.md
+  - Code: source_code.md
 
 theme:
     name: material
