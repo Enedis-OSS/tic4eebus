@@ -11,7 +11,7 @@
 
 [![statut REUSE](https://api.reuse.software/badge/git.fsfe.org/reuse/api)](https://api.reuse.software/info/git.fsfe.org/reuse/api)
 
-[🇫🇷 Français](README.fr.md) | [🇺🇸 English](README.md)
+[🇫🇷 Français](README.md) | [🇺🇸 English](README.en.md)
 
 ## Sommaire
 
