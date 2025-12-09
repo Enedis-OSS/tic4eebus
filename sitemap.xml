@@ -2,58 +2,72 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
         <loc>https://enedis-oss.github.io/tic4eebus/</loc>
-        <lastmod>2025-11-26</lastmod>
+        <lastmod>2025-12-09</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://enedis-oss.github.io/tic4eebus/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://enedis-oss.github.io/tic4eebus/en/"/>
     </url>
     <url>
         <loc>https://enedis-oss.github.io/tic4eebus/architecture/</loc>
-        <lastmod>2025-11-26</lastmod>
+        <lastmod>2025-12-09</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://enedis-oss.github.io/tic4eebus/architecture/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://enedis-oss.github.io/tic4eebus/en/architecture/"/>
     </url>
     <url>
         <loc>https://enedis-oss.github.io/tic4eebus/configuration/</loc>
-        <lastmod>2025-11-26</lastmod>
+        <lastmod>2025-12-09</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://enedis-oss.github.io/tic4eebus/configuration/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://enedis-oss.github.io/tic4eebus/en/configuration/"/>
     </url>
     <url>
         <loc>https://enedis-oss.github.io/tic4eebus/data_model/</loc>
-        <lastmod>2025-11-26</lastmod>
+        <lastmod>2025-12-09</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://enedis-oss.github.io/tic4eebus/data_model/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://enedis-oss.github.io/tic4eebus/en/data_model/"/>
     </url>
     <url>
+        <loc>https://enedis-oss.github.io/tic4eebus/source_code/</loc>
+        <lastmod>2025-12-09</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://enedis-oss.github.io/tic4eebus/source_code/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://enedis-oss.github.io/tic4eebus/en/source_code/"/>
+    </url>
+    <url>
         <loc>https://enedis-oss.github.io/tic4eebus/en/</loc>
-        <lastmod>2025-11-26</lastmod>
+        <lastmod>2025-12-09</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://enedis-oss.github.io/tic4eebus/en/"/>
         <xhtml:link rel="alternate" hreflang="fr" href="https://enedis-oss.github.io/tic4eebus/"/>
     </url>
     <url>
         <loc>https://enedis-oss.github.io/tic4eebus/en/architecture/</loc>
-        <lastmod>2025-11-26</lastmod>
+        <lastmod>2025-12-09</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://enedis-oss.github.io/tic4eebus/en/architecture/"/>
         <xhtml:link rel="alternate" hreflang="fr" href="https://enedis-oss.github.io/tic4eebus/architecture/"/>
     </url>
     <url>
         <loc>https://enedis-oss.github.io/tic4eebus/en/configuration/</loc>
-        <lastmod>2025-11-26</lastmod>
+        <lastmod>2025-12-09</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://enedis-oss.github.io/tic4eebus/en/configuration/"/>
         <xhtml:link rel="alternate" hreflang="fr" href="https://enedis-oss.github.io/tic4eebus/configuration/"/>
     </url>
     <url>
         <loc>https://enedis-oss.github.io/tic4eebus/en/data_model/</loc>
-        <lastmod>2025-11-26</lastmod>
+        <lastmod>2025-12-09</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://enedis-oss.github.io/tic4eebus/en/data_model/"/>
         <xhtml:link rel="alternate" hreflang="fr" href="https://enedis-oss.github.io/tic4eebus/data_model/"/>
+    </url>
+    <url>
+        <loc>https://enedis-oss.github.io/tic4eebus/en/source_code/</loc>
+        <lastmod>2025-12-09</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://enedis-oss.github.io/tic4eebus/en/source_code/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://enedis-oss.github.io/tic4eebus/source_code/"/>
     </url>
 </urlset>
