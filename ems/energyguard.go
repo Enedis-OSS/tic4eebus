@@ -3,6 +3,17 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+/*
+Package ems implements energy management system routines for EEBus Overload Protection by EV Charging Current Curtailment (OPEV) use case.
+
+The energy management system referred to as "Energy Guard" in EEBus protocol is responsible for following scenarios:
+
+  - curtails changing current of connected electric vehicles to avoid overload of electrical installation
+
+  - provide heartbeat mechanism to remote EEBus node (typically wallbox) to check its availability
+
+  - sends error states to remote EEBus node (typically wallbox)
+*/
 package ems
 
 import (
@@ -35,71 +46,77 @@ import (
 )
 
 const (
-	ENTITY_TYPE                                          = model.EntityTypeTypeCEM
-	TIC2WEBSOCKET_CLIENT_RUN_AND_WATCH_PERIOD_IN_SECONDS = 1
-	TIC_READ_TIMEOUT                                     = "TIC read timeout"
-	OPEV_USE_CASE_NAME                                   = model.UseCaseNameTypeOverloadProtectionByEVChargingCurrentCurtailment
-	OPEV_USE_CASE_VERSION                                = "1.0.1"
-	OPEV_USE_CASE_DUCUMENT_SUB_REVISION                  = "release"
+	entity_type                                          = model.EntityTypeTypeCEM
+	tic2websocket_client_run_and_watch_period_in_seconds = 1
+	tic_read_timeout                                     = "TIC read timeout"
+	opev_use_case_name                                   = model.UseCaseNameTypeOverloadProtectionByEVChargingCurrentCurtailment
+	opev_use_case_version                                = "1.0.1"
+	opev_use_case_document_sub_revision                  = "release"
 )
 
 var (
-	OPEV_USE_CASE_SCENARIO = []model.UseCaseScenarioSupportType{1, 2, 3}
+	opev_use_case_scenario = []model.UseCaseScenarioSupportType{1, 2, 3}
 )
 
-type OnEnergyGuardData func(data data.DataModel)
+// Callback used for data subscription
+type onData func(data data.DataModel)
 
-type EnergyGuardDataSubscriber struct {
-	onData OnEnergyGuardData
+type subscriber struct {
+	onData onData
 }
 
+// EnergyGuard handler for EEBUS node service
 type EnergyGuard struct {
 	data                       *data.DataSynchronizer
 	config                     config.Config
 	subscriberAccess           sync.Mutex
-	subscriberMap              map[string]EnergyGuardDataSubscriber
+	subscriberMap              map[string]subscriber
 	service                    *service.Service
 	diagnosis                  *server.DeviceDiagnosis
 	vehicle                    *evse.Vehicle
 	wallbox                    *evse.Wallbox
 	tic2WebsocketAccess        sync.Mutex
 	tic2WebsocketSubcriptionId string
-	tic2WebsocketAvailableTIC  linkymeter.TICIdentifier
-	tic2WebsocketClient        *linkymeter.TIC2WebsocketClient
+	tic2WebsocketAvailableTic  linkymeter.TicIdentifier
+	tic2WebsocketClient        *linkymeter.Tic2WebsocketClient
 	scheduler                  *gocron.Scheduler
 	overloadProtectionJob      *gocron.Job
 	tic2WebsocketClientJob     *gocron.Job
 }
 
+// NewEnergyGuard creates an instance of EnergyGuard from configuration data.
 func NewEnergyGuard(
 	config config.Config,
 ) *EnergyGuard {
 	energyGuard := &EnergyGuard{}
-
+	// Save configuration
 	energyGuard.config = config
-
+	// Create data synchronizer
 	energyGuard.data = data.NewDataSynchronizer(energyGuard.config.DataModel)
-
-	energyGuard.createTIC2WebsocketClient()
-
+	// Create TIC2WebSocket client
+	energyGuard.createTic2WebsocketClient()
+	// Load certificate and configure EEBUS node service
 	certificate := energyGuard.loadCertificate()
 	energyGuard.configureService(certificate)
-
-	localEntity := energyGuard.service.LocalDevice().EntityForType(ENTITY_TYPE)
+	// Create wallbox, vehicle and diagnosis
+	localEntity := energyGuard.service.LocalDevice().EntityForType(entity_type)
 	energyGuard.createWallbox(localEntity)
 	energyGuard.createVehicle(localEntity)
 	energyGuard.createDiagnosis(localEntity)
-
+	// Create scheduler for periodic overload protection algorithm
 	energyGuard.scheduler = gocron.NewScheduler(time.UTC)
 
 	return energyGuard
 }
 
+// Starts the EnergyGuard.
+//
+// This includes starting the TIC2WebSocket client, registering to the remote EEBUS node, starting the EEBUS node service, and starting the overload protection algorithm.
 func (e *EnergyGuard) Start() {
-	e.startTIC2WebsocketClient()
+	e.startTic2WebsocketClient()
 
 	e.Info("Registering to remote EEBUS node")
-	e.service.RegisterRemoteSKI(e.config.EEBUS.RemoteSKI)
+	e.service.RegisterRemoteSKI(e.config.Eebus.RemoteSki)
 
 	e.Info("Starting EEBUS node service")
 	e.service.Start()
@@ -107,6 +124,9 @@ func (e *EnergyGuard) Start() {
 	e.startOverloadProtection()
 }
 
+// Stops the EnergyGuard.
+//
+// This includes stopping the overload protection algorithm, stopping the EEBUS node service, disabling remote connection to wallbox and vehicle, and stopping the TIC2WebSocket client.
 func (e *EnergyGuard) Stop() {
 	e.stopOverloadProtection()
 
@@ -115,11 +135,11 @@ func (e *EnergyGuard) Stop() {
 	e.vehicle.DisableRemoteConnection()
 	e.wallbox.DisableRemoteConnection()
 
-	e.stopTIC2WebsocketClient()
+	e.stopTic2WebsocketClient()
 	e.scheduler.Stop()
 }
 
-func (e *EnergyGuard) startTIC2WebsocketClient() {
+func (e *EnergyGuard) startTic2WebsocketClient() {
 	e.Info("Start TIC2Websocket client")
 
 	if !e.scheduler.IsRunning() {
@@ -127,21 +147,21 @@ func (e *EnergyGuard) startTIC2WebsocketClient() {
 	}
 	var err error
 	if e.tic2WebsocketClientJob == nil {
-		e.tic2WebsocketClientJob, err = e.scheduler.Every(TIC2WEBSOCKET_CLIENT_RUN_AND_WATCH_PERIOD_IN_SECONDS).Seconds().Do(e.runAndWatchTIC2WebsocketClient)
+		e.tic2WebsocketClientJob, err = e.scheduler.Every(tic2websocket_client_run_and_watch_period_in_seconds).Seconds().Do(e.runAndWatchTic2WebsocketClient)
 	}
 	if err != nil {
 		log.Fatalf("Cannot start TIC2Websocket client job : %s", err.Error())
 	}
 }
 
-func (e *EnergyGuard) stopTIC2WebsocketClient() {
+func (e *EnergyGuard) stopTic2WebsocketClient() {
 	var err error
 
 	e.Info("Stopping TIC2Websocket client")
 	e.scheduler.Job(e.tic2WebsocketClientJob).Stop()
 	if e.tic2WebsocketClient.IsConnected() {
-		if e.tic2WebsocketClient.CheckSubscriber(e.getTIC2WebsocketSubscriptionIdAndAvailableTIC()) {
-			err := e.tic2WebsocketClient.UnsubscribeTIC(e.getTIC2WebsocketSubscriptionId())
+		if e.tic2WebsocketClient.CheckSubscriber(e.getTic2WebsocketSubscriptionIdAndAvailableTic()) {
+			err := e.tic2WebsocketClient.UnsubscribeTic(e.getTic2WebsocketSubscriptionId())
 			if err != nil {
 				e.Errorf("Cannot unsubscribe from TIC: %s", err.Error())
 			}
@@ -153,22 +173,22 @@ func (e *EnergyGuard) stopTIC2WebsocketClient() {
 	}
 }
 
-func (e *EnergyGuard) runAndWatchTIC2WebsocketClient() {
-	if !e.data.HasMeter() {
+func (e *EnergyGuard) runAndWatchTic2WebsocketClient() {
+	if !e.data.HasMeterData() {
 		if !e.tic2WebsocketClient.IsConnected() {
-			error := e.connectTIC2WebsocketClient()
+			error := e.connectTic2WebsocketClient()
 			if error != nil {
 				return
 			}
 		}
-		if linkymeter.IsEmptyIdentifier(e.tic2WebsocketAvailableTIC) {
-			error := e.findTIC2WebsocketClientAvailableTIC()
+		if linkymeter.IsEmptyIdentifier(e.tic2WebsocketAvailableTic) {
+			error := e.findTic2WebsocketClientAvailableTic()
 			if error != nil {
 				return
 			}
 		}
-		if !e.tic2WebsocketClient.CheckSubscriber(e.getTIC2WebsocketSubscriptionIdAndAvailableTIC()) {
-			error := e.subscribeTIC2WebsocketClient()
+		if !e.tic2WebsocketClient.CheckSubscriber(e.getTic2WebsocketSubscriptionIdAndAvailableTic()) {
+			error := e.subscribeTic2WebsocketClient()
 			if error != nil {
 				return
 			}
@@ -176,94 +196,94 @@ func (e *EnergyGuard) runAndWatchTIC2WebsocketClient() {
 	}
 }
 
-func (e *EnergyGuard) connectTIC2WebsocketClient() error {
-	tic2WebsocketHost := fmt.Sprintf("%s:%d", e.config.TeleInformationClient.TIC2Websocket.IPAddress, e.config.TeleInformationClient.TIC2Websocket.TCPPort)
+func (e *EnergyGuard) connectTic2WebsocketClient() error {
+	tic2WebsocketHost := fmt.Sprintf("%s:%d", e.config.TeleInformationClient.Tic2Websocket.IpAddress, e.config.TeleInformationClient.Tic2Websocket.TcpPort)
 	err := e.tic2WebsocketClient.Connect(tic2WebsocketHost)
 
 	if err != nil {
-		return e.onTIC2WebsocketErrorConnectionFailure(tic2WebsocketHost, err)
+		return e.onTic2WebsocketErrorConnectionFailure(tic2WebsocketHost, err)
 	}
 	log.Infof("TIC2WebsocketClient connected with host '%s'", tic2WebsocketHost)
 
 	return nil
 }
 
-func (e *EnergyGuard) findTIC2WebsocketClientAvailableTIC() error {
+func (e *EnergyGuard) findTic2WebsocketClientAvailableTic() error {
 
-	availableTICs, err := e.tic2WebsocketClient.GetAvailableTICs()
+	availableTics, err := e.tic2WebsocketClient.GetAvailableTics()
 	if err != nil {
-		return e.onTIC2WebsocketErrorCannotGetAvailableTIC(err)
+		return e.onTic2WebsocketErrorCannotGetAvailableTic(err)
 	}
-	var availableTIC linkymeter.TICIdentifier
-	meterSerialNumber := e.config.TeleInformationClient.TICIdentifier.SerialNumber
+	var availableTic linkymeter.TicIdentifier
+	meterSerialNumber := e.config.TeleInformationClient.TicIdentifier.SerialNumber
 	if len(meterSerialNumber) > 0 {
 		serialNumberFound := false
-		for i := 0; i < len(availableTICs); i++ {
-			if availableTICs[i].SerialNumber == meterSerialNumber {
-				availableTIC = availableTICs[i]
+		for i := 0; i < len(availableTics); i++ {
+			if availableTics[i].SerialNumber == meterSerialNumber {
+				availableTic = availableTics[i]
 				serialNumberFound = true
 				break
 			}
 		}
 		if !serialNumberFound {
-			return e.onTIC2WebsocketErrorCannotFindMeterSerialNumber(meterSerialNumber)
+			return e.onTic2WebsocketErrorCannotFindMeterSerialNumber(meterSerialNumber)
 		}
 	} else {
-		for i := 0; i < len(availableTICs); i++ {
-			if availableTICs[i].SerialNumber != "" {
-				availableTIC = availableTICs[i]
+		for i := 0; i < len(availableTics); i++ {
+			if availableTics[i].SerialNumber != "" {
+				availableTic = availableTics[i]
 				break
 			}
 		}
-		if len(availableTIC.SerialNumber) == 0 {
-			return e.onTIC2WebsocketErrorNoMeterSerialNumberAvailable()
+		if len(availableTic.SerialNumber) == 0 {
+			return e.onTic2WebsocketErrorNoMeterSerialNumberAvailable()
 		}
 	}
-	log.Infof("TIC2Websocket find available TIC '%s'", availableTIC)
-	e.setTIC2WebsocketAvailableTIC(availableTIC)
+	log.Infof("TIC2Websocket find available TIC '%s'", availableTic)
+	e.setTic2WebsocketAvailableTic(availableTic)
 
 	return nil
 }
 
-func (e *EnergyGuard) subscribeTIC2WebsocketClient() error {
-	availableTIC := e.getTIC2WebsocketAvailableTIC()
-	subcriptionId, err := e.tic2WebsocketClient.SubscribeTIC(e.onTICData, e.onTICError, e.onTIC2WebsocketErrorAbnormalClosure, availableTIC)
+func (e *EnergyGuard) subscribeTic2WebsocketClient() error {
+	availableTic := e.getTic2WebsocketAvailableTic()
+	subcriptionId, err := e.tic2WebsocketClient.SubscribeTic(e.onTicData, e.onTicError, e.onTIC2WebsocketErrorAbnormalClosure, availableTic)
 	if err != nil {
-		return e.onTIC2WebsocketErrorSubscriptionFailure(availableTIC, err)
+		return e.onTic2WebsocketErrorSubscriptionFailure(availableTic, err)
 	}
-	log.Infof("TIC2WebsocketClient subscribed with available TIC '%+v'", availableTIC)
-	e.setTIC2WebsocketSubscriptionId(subcriptionId)
+	log.Infof("TIC2WebsocketClient subscribed with available TIC '%+v'", availableTic)
+	e.setTic2WebsocketSubscriptionId(subcriptionId)
 
 	return err
 }
 
-func (e *EnergyGuard) getTIC2WebsocketSubscriptionIdAndAvailableTIC() (subscriptionId string, availableTIC linkymeter.TICIdentifier) {
+func (e *EnergyGuard) getTic2WebsocketSubscriptionIdAndAvailableTic() (subscriptionId string, availableTic linkymeter.TicIdentifier) {
 	e.tic2WebsocketAccess.Lock()
 	subscriptionId = e.tic2WebsocketSubcriptionId
-	availableTIC = linkymeter.TICIdentifier(e.tic2WebsocketAvailableTIC)
+	availableTic = linkymeter.TicIdentifier(e.tic2WebsocketAvailableTic)
 	e.tic2WebsocketAccess.Unlock()
 
-	return subscriptionId, availableTIC
+	return subscriptionId, availableTic
 }
 
-func (e *EnergyGuard) clearTIC2WebsocketSubscriptionIdAndAvailableTIC() {
+func (e *EnergyGuard) clearTic2WebsocketSubscriptionIdAndAvailableTic() {
 	e.tic2WebsocketAccess.Lock()
 	e.tic2WebsocketSubcriptionId = ""
-	e.tic2WebsocketAvailableTIC = linkymeter.TICIdentifier{}
+	e.tic2WebsocketAvailableTic = linkymeter.TicIdentifier{}
 	e.tic2WebsocketAccess.Unlock()
 }
 
-func (e *EnergyGuard) getTIC2WebsocketAvailableTIC() (availableTIC linkymeter.TICIdentifier) {
+func (e *EnergyGuard) getTic2WebsocketAvailableTic() (availableTic linkymeter.TicIdentifier) {
 	e.tic2WebsocketAccess.Lock()
-	availableTIC = linkymeter.TICIdentifier(e.tic2WebsocketAvailableTIC)
+	availableTic = linkymeter.TicIdentifier(e.tic2WebsocketAvailableTic)
 	e.tic2WebsocketAccess.Unlock()
 
-	return availableTIC
+	return availableTic
 }
 
-func (e *EnergyGuard) setTIC2WebsocketAvailableTIC(availableTIC linkymeter.TICIdentifier) {
+func (e *EnergyGuard) setTic2WebsocketAvailableTic(availableTic linkymeter.TicIdentifier) {
 	e.tic2WebsocketAccess.Lock()
-	e.tic2WebsocketAvailableTIC = availableTIC
+	e.tic2WebsocketAvailableTic = availableTic
 	e.tic2WebsocketAccess.Unlock()
 }
 
@@ -273,7 +293,7 @@ func (e *EnergyGuard) clearTIC2WebsocketSubscriptionId() {
 	e.tic2WebsocketAccess.Unlock()
 }
 
-func (e *EnergyGuard) getTIC2WebsocketSubscriptionId() (subscriptionId string) {
+func (e *EnergyGuard) getTic2WebsocketSubscriptionId() (subscriptionId string) {
 	e.tic2WebsocketAccess.Lock()
 	subscriptionId = e.tic2WebsocketSubcriptionId
 	e.tic2WebsocketAccess.Unlock()
@@ -281,7 +301,7 @@ func (e *EnergyGuard) getTIC2WebsocketSubscriptionId() (subscriptionId string) {
 	return subscriptionId
 }
 
-func (e *EnergyGuard) setTIC2WebsocketSubscriptionId(subscriptionId string) {
+func (e *EnergyGuard) setTic2WebsocketSubscriptionId(subscriptionId string) {
 	e.tic2WebsocketAccess.Lock()
 	e.tic2WebsocketSubcriptionId = subscriptionId
 	e.tic2WebsocketAccess.Unlock()
@@ -314,7 +334,7 @@ func (e *EnergyGuard) runOverloadProtection() {
 		return
 	}
 	// EEBUS OPEV usa case available ?
-	if !e.data.HasOPEV() {
+	if !e.data.IsOpevSupported() {
 		return
 	}
 	// Vehicle not connected ?
@@ -322,7 +342,7 @@ func (e *EnergyGuard) runOverloadProtection() {
 		return
 	}
 	// Get vehicle current limits
-	currentLimits, currentLimitsError := e.GetVehicleCurrentLimits()
+	currentLimits, currentLimitsError := e.getVehicleCurrentLimits()
 	if currentLimitsError != nil {
 		log.Errorf("OverloadProtection cannot get vehicle current limits : %s", currentLimitsError)
 		return
@@ -345,7 +365,7 @@ func (e *EnergyGuard) runOverloadProtection() {
 		}
 	} else {
 		// Linky meter data available ?
-		if e.data.HasMeter() {
+		if e.data.HasMeterData() {
 			loadControlLimit := e.data.GetOverloadProtectionValue()
 			if loadControlLimit == 0.0 {
 				loadControlLimit = maxCurrentLimit
@@ -395,7 +415,7 @@ func (e *EnergyGuard) readUsecasesInfos() {
 		e.onReadUsecaseInfosErrorNoLocalDeviceFound()
 		return
 	}
-	localEntity := localDevice.EntityForType(ENTITY_TYPE)
+	localEntity := localDevice.EntityForType(entity_type)
 	if localEntity == nil {
 		e.onReadUsecaseInfosErrorExpectedLocalEntityFound()
 		return
@@ -408,7 +428,7 @@ func (e *EnergyGuard) readUsecasesInfos() {
 	localFeatureAddress := localFeature.Address()
 	var remoteFeatureAddress *model.FeatureAddressType
 	remoteFeatureAddress = nil
-	remoteDevice := localDevice.RemoteDeviceForSki(e.config.EEBUS.RemoteSKI)
+	remoteDevice := localDevice.RemoteDeviceForSki(e.config.Eebus.RemoteSki)
 	if remoteDevice == nil {
 		e.onReadUsecaseInfosErrorNoRemoteDeviceFound()
 		return
@@ -453,8 +473,9 @@ func (e *EnergyGuard) readUsecasesInfos() {
 	}
 }
 
-func (e *EnergyGuard) SubscribeData(onData OnEnergyGuardData) (id string) {
-	subscriber := EnergyGuardDataSubscriber{onData: onData}
+// SubscribeData subscribes to data model updates and returns a subscription ID
+func (e *EnergyGuard) SubscribeData(onData onData) (id string) {
+	subscriber := subscriber{onData: onData}
 	id = uuid.New().String()
 	e.subscriberAccess.Lock()
 	e.subscriberMap[id] = subscriber
@@ -463,6 +484,7 @@ func (e *EnergyGuard) SubscribeData(onData OnEnergyGuardData) (id string) {
 	return id
 }
 
+// UnsubscribeData unsubscribes from data model updates using given subscription ID.
 func (e *EnergyGuard) UnsubscribeData(id string) error {
 	_, ok := e.subscriberMap[id]
 	if !ok {
@@ -475,7 +497,7 @@ func (e *EnergyGuard) UnsubscribeData(id string) error {
 	return nil
 }
 
-func (e *EnergyGuard) GetVehicleCurrentLimits() (evse.CurrentLimits, error) {
+func (e *EnergyGuard) getVehicleCurrentLimits() (evse.CurrentLimits, error) {
 	// EEBUS remote device not connected ?
 	if !e.data.IsConnected() {
 		return evse.CurrentLimits{}, fmt.Errorf("EEBUS remote device not connected")
@@ -493,24 +515,6 @@ func (e *EnergyGuard) GetVehicleCurrentLimits() (evse.CurrentLimits, error) {
 	return currentLimits.(evse.CurrentLimits), nil
 }
 
-func (e *EnergyGuard) GetVehicleLoadControlLimits() ([]ucapi.LoadLimitsPhase, error) {
-	// EEBUS remote device not connected ?
-	if !e.data.IsConnected() {
-		return nil, fmt.Errorf("EEBUS remote device not connected")
-	}
-	// Vehicle data not available ?
-	vehicle := e.data.GetVehicle()
-	if vehicle == nil {
-		return nil, fmt.Errorf("vehicle data not available")
-	}
-	loadControlLimits, ok := vehicle[evse.VEHICLE_LOAD_CONTROL_LIMITS]
-	// Load control limits available ?
-	if !ok {
-		return nil, fmt.Errorf("vehicle load control limits data not available")
-	}
-	return loadControlLimits.([]ucapi.LoadLimitsPhase), nil
-}
-
 func (e *EnergyGuard) notifyData() {
 	e.subscriberAccess.Lock()
 	for _, subscriber := range e.subscriberMap {
@@ -522,7 +526,7 @@ func (e *EnergyGuard) notifyData() {
 func (e *EnergyGuard) loadCertificate() tls.Certificate {
 
 	e.Info("Loading certificate")
-	certificate, error := tls.LoadX509KeyPair(e.config.EEBUS.CertificateFilePath, e.config.EEBUS.PrivateKeyFilePath)
+	certificate, error := tls.LoadX509KeyPair(e.config.Eebus.CertificateFilePath, e.config.Eebus.PrivateKeyFilePath)
 	if error != nil {
 		log.Fatal(error)
 	}
@@ -540,21 +544,21 @@ func (e *EnergyGuard) configureService(certificate tls.Certificate) {
 
 	e.Info("Creating EEBUS node configuration")
 	configuration, error := api.NewConfiguration(
-		e.config.EEBUS.VendorCode,
-		e.config.EEBUS.DeviceBrand,
-		e.config.EEBUS.DeviceModel,
-		e.config.EEBUS.SerialNumber,
+		e.config.Eebus.VendorCode,
+		e.config.Eebus.DeviceBrand,
+		e.config.Eebus.DeviceModel,
+		e.config.Eebus.SerialNumber,
 		[]shipapi.DeviceCategoryType{shipapi.DeviceCategoryTypeEnergyManagementSystem},
 		model.DeviceTypeTypeEnergyManagementSystem,
-		[]model.EntityTypeType{ENTITY_TYPE},
-		e.config.EEBUS.ServerPort,
+		[]model.EntityTypeType{entity_type},
+		e.config.Eebus.ServerPort,
 		certificate,
-		time.Duration(float64(e.config.EEBUS.HeartbeatTimeoutInSeconds)*float64(time.Second)),
+		time.Duration(float64(e.config.Eebus.HeartbeatTimeoutInSeconds)*float64(time.Second)),
 	)
 	if error != nil {
 		log.Fatal(error)
 	}
-	configuration.SetAlternateIdentifier(e.config.EEBUS.DeviceBrand + "-" + e.config.EEBUS.DeviceModel + "-" + e.config.EEBUS.SerialNumber)
+	configuration.SetAlternateIdentifier(e.config.Eebus.DeviceBrand + "-" + e.config.Eebus.DeviceModel + "-" + e.config.Eebus.SerialNumber)
 
 	e.Info("Creating EEBUS node service")
 	e.service = service.NewService(configuration, e)
@@ -605,47 +609,70 @@ func (e *EnergyGuard) updateDiagnosis(operatingState model.DeviceDiagnosisOperat
 	return hasChanged
 }
 
-func (e *EnergyGuard) createTIC2WebsocketClient() {
+func (e *EnergyGuard) createTic2WebsocketClient() {
 	e.Info("Creating TIC2Websocket client")
-	e.tic2WebsocketClient = linkymeter.NewTIC2WebsocketClient()
+	e.tic2WebsocketClient = linkymeter.NewTic2WebsocketClient()
 }
 
-// Logging interface
-
+// Logging interface for Trace level
+//
+// See https://pkg.go.dev/github.com/sirupsen/logrus#Logger.Trace
 func (e *EnergyGuard) Trace(args ...interface{}) {
 	log.Trace(args...)
 }
 
+// Logging interface for Trace level with formatting
+//
+// See https://pkg.go.dev/github.com/sirupsen/logrus#Logger.Tracef
 func (e *EnergyGuard) Tracef(format string, args ...interface{}) {
 	log.Tracef(format, args...)
 }
 
+// Logging interface for Debug level
+//
+// See https://pkg.go.dev/github.com/sirupsen/logrus#Logger.Debug
 func (e *EnergyGuard) Debug(args ...interface{}) {
 	log.Debug(args...)
 }
 
+// Logging interface for Debug level with formatting
+//
+// See https://pkg.go.dev/github.com/sirupsen/logrus#Logger.Debugf
 func (e *EnergyGuard) Debugf(format string, args ...interface{}) {
 	log.Debugf(format, args...)
 }
 
+// Logging interface for Info level
+//
+// See https://pkg.go.dev/github.com/sirupsen/logrus#Logger.Info
 func (e *EnergyGuard) Info(args ...interface{}) {
 	log.Info(args...)
 }
 
+// Logging interface for Info level with formatting
+//
+// See https://pkg.go.dev/github.com/sirupsen/logrus#Logger.Infof
 func (e *EnergyGuard) Infof(format string, args ...interface{}) {
 	log.Infof(format, args...)
 }
 
+// Logging interface for Error level
+//
+// See https://pkg.go.dev/github.com/sirupsen/logrus#Logger.Error
 func (e *EnergyGuard) Error(args ...interface{}) {
 	log.Error(args...)
 }
 
+// Logging interface for Error level with formatting
+//
+// See https://pkg.go.dev/github.com/sirupsen/logrus#Logger.Errorf
 func (e *EnergyGuard) Errorf(format string, args ...interface{}) {
 	log.Errorf(format, args...)
 }
 
-// EEBUSServiceHandler
-
+// EEBUS Service interface used to notify a connection with a remote EEBUS node.
+//
+// See https://pkg.go.dev/github.com/enbility/eebus-go@v0.7.0/service#Service.RemoteSKIConnected
 func (e *EnergyGuard) RemoteSKIConnected(service api.ServiceInterface, ski string) {
 	e.Infof("Connected with EEBUS remote service (ski=%s)", ski)
 	hasChanged := e.data.SetIsConnected(true)
@@ -656,12 +683,15 @@ func (e *EnergyGuard) RemoteSKIConnected(service api.ServiceInterface, ski strin
 	}
 }
 
+// EEBUS Service interface used to notify a disconnection with a remote EEBUS node.
+//
+// See https://pkg.go.dev/github.com/enbility/eebus-go@v0.7.0/service#Service.RemoteSKIDisconnected
 func (e *EnergyGuard) RemoteSKIDisconnected(service api.ServiceInterface, ski string) {
 	errorMsg := fmt.Errorf("disconnected from EEBUS remote service (ski=%s)", ski)
 	e.Error(errorMsg)
 	hasChanged := e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(errorMsg.Error()))
 	e.data.SetIsConnected(false)
-	e.data.SetHasOPEV(false)
+	e.data.SetIsOpevSupported(false)
 	e.wallbox.DisableRemoteConnection()
 	e.vehicle.DisableRemoteConnection()
 	if hasChanged {
@@ -669,6 +699,9 @@ func (e *EnergyGuard) RemoteSKIDisconnected(service api.ServiceInterface, ski st
 	}
 }
 
+// EEBUS Service interface used to notify when a remote EEBUS node is detected.
+//
+// See https://pkg.go.dev/github.com/enbility/eebus-go@v0.7.0/service#Service.VisibleRemoteServicesUpdated
 func (e *EnergyGuard) VisibleRemoteServicesUpdated(service api.ServiceInterface, entries []shipapi.RemoteService) {
 	for i := 0; i < len(entries); i++ {
 		e.Infof(
@@ -682,12 +715,18 @@ func (e *EnergyGuard) VisibleRemoteServicesUpdated(service api.ServiceInterface,
 	}
 }
 
+// EEBUS Service interface used to provide the remote EEBUS node SHIP ID.
+//
+// See https://pkg.go.dev/github.com/enbility/eebus-go@v0.7.0/service#Service.ServiceShipIDUpdate
 func (e *EnergyGuard) ServiceShipIDUpdate(ski string, shipdID string) {
 	e.Infof("ServiceShipIDUpdate with ski=%s and shipID=%s", ski, shipdID)
 }
 
+// EEBUS Service interface used to provide the pairing state for the remote EEBUS node.
+//
+// See https://pkg.go.dev/github.com/enbility/eebus-go@v0.7.0/service#Service.ServicePairingDetailUpdate
 func (e *EnergyGuard) ServicePairingDetailUpdate(ski string, detail *shipapi.ConnectionStateDetail) {
-	if ski == e.config.EEBUS.RemoteSKI && detail.State() == shipapi.ConnectionStateRemoteDeniedTrust {
+	if ski == e.config.Eebus.RemoteSki && detail.State() == shipapi.ConnectionStateRemoteDeniedTrust {
 		e.Error("The remote service denied trust. Exiting.")
 		e.service.CancelPairingWithSKI(ski)
 		e.service.UnregisterRemoteSKI(ski)
@@ -696,8 +735,11 @@ func (e *EnergyGuard) ServicePairingDetailUpdate(ski string, detail *shipapi.Con
 	}
 }
 
+// EEBUS Service interface used to check the remote EEBUS node Subject Key Identifier (SKI) with configuration data.
+//
+// See https://pkg.go.dev/github.com/enbility/eebus-go@v0.7.0/service#Service.AllowWaitingForTrust
 func (e *EnergyGuard) AllowWaitingForTrust(ski string) bool {
-	return ski == e.config.EEBUS.RemoteSKI
+	return ski == e.config.Eebus.RemoteSki
 }
 
 func (e *EnergyGuard) writeVehicleLoadControlLimits(targetCurrentLimit float64) {
@@ -719,20 +761,20 @@ func (e *EnergyGuard) writeVehicleLoadControlLimits(targetCurrentLimit float64) 
 	}
 }
 
-func (e *EnergyGuard) onTICData(ticData linkymeter.TICData) {
+func (e *EnergyGuard) onTicData(ticData linkymeter.TicData) {
 	meterData := linkymeter.ComputeMeterData(ticData.Content)
-	hasChanged := e.onTICSuccess(meterData)
+	hasChanged := e.onTicSuccess(meterData)
 	if hasChanged {
 		e.notifyData()
 	}
 }
 
-func (e *EnergyGuard) onTICError(ticError linkymeter.TICError) {
+func (e *EnergyGuard) onTicError(ticError linkymeter.TicError) {
 	notificationNeeded := false
-	if ticError.ErrorMessage == TIC_READ_TIMEOUT {
-		notificationNeeded = e.onTICErrorReadTimeout()
+	if ticError.ErrorMessage == tic_read_timeout {
+		notificationNeeded = e.onTicErrorReadTimeout()
 	} else {
-		notificationNeeded = e.onTICErrorCritical(ticError.ErrorMessage)
+		notificationNeeded = e.onTicErrorCritical(ticError.ErrorMessage)
 	}
 	ticErrorBytes, error := json.MarshalIndent(ticError, "", "  ")
 	if error != nil {
@@ -745,67 +787,67 @@ func (e *EnergyGuard) onTICError(ticError linkymeter.TICError) {
 	}
 }
 
-func (e *EnergyGuard) onTICSuccess(meterData linkymeter.MeterData) (hasChanged bool) {
+func (e *EnergyGuard) onTicSuccess(meterData linkymeter.MeterData) (hasChanged bool) {
 	hasChanged = e.data.SetMeter(meterData)
-	if hasChanged && e.data.IsConnected() && e.data.HasOPEV() {
+	if hasChanged && e.data.IsConnected() && e.data.IsOpevSupported() {
 		hasChanged = e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeNormalOperation, model.LastErrorCodeType(data.DIAGNOSIS_NO_ERROR))
 	}
 	return hasChanged
 }
 
-func (e *EnergyGuard) onTICErrorReadTimeout() (hasChanged bool) {
-	e.data.SetHasMeter(false)
-	hasChanged = e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(TIC_READ_TIMEOUT))
+func (e *EnergyGuard) onTicErrorReadTimeout() (hasChanged bool) {
+	e.data.SetHasMeterData(false)
+	hasChanged = e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(tic_read_timeout))
 	return hasChanged
 }
 
-func (e *EnergyGuard) onTICErrorCritical(errMsg string) (hasChanged bool) {
-	e.data.SetHasMeter(false)
+func (e *EnergyGuard) onTicErrorCritical(errMsg string) (hasChanged bool) {
+	e.data.SetHasMeterData(false)
 	hasChanged = e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(errMsg))
-	e.clearTIC2WebsocketSubscriptionIdAndAvailableTIC()
+	e.clearTic2WebsocketSubscriptionIdAndAvailableTic()
 	return hasChanged
 }
 
 func (e *EnergyGuard) onTIC2WebsocketErrorAbnormalClosure() {
-	e.data.SetHasMeter(false)
+	e.data.SetHasMeterData(false)
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType("TIC2Websocket abnormal closure"))
-	e.clearTIC2WebsocketSubscriptionIdAndAvailableTIC()
+	e.clearTic2WebsocketSubscriptionIdAndAvailableTic()
 }
 
-func (e *EnergyGuard) onTIC2WebsocketErrorConnectionFailure(host string, err error) error {
-	e.data.SetHasMeter(false)
+func (e *EnergyGuard) onTic2WebsocketErrorConnectionFailure(host string, err error) error {
+	e.data.SetHasMeterData(false)
 	err = fmt.Errorf("TIC2WebsocketClient cannot connect with host '%s' : %s", host, err.Error())
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
-	e.clearTIC2WebsocketSubscriptionIdAndAvailableTIC()
+	e.clearTic2WebsocketSubscriptionIdAndAvailableTic()
 	return err
 }
 
-func (e *EnergyGuard) onTIC2WebsocketErrorCannotGetAvailableTIC(err error) error {
-	e.data.SetHasMeter(false)
+func (e *EnergyGuard) onTic2WebsocketErrorCannotGetAvailableTic(err error) error {
+	e.data.SetHasMeterData(false)
 	err = fmt.Errorf("TIC2WebsocketClient cannot get available TICs : %s", err.Error())
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
-	e.clearTIC2WebsocketSubscriptionIdAndAvailableTIC()
+	e.clearTic2WebsocketSubscriptionIdAndAvailableTic()
 	return err
 }
 
-func (e *EnergyGuard) onTIC2WebsocketErrorCannotFindMeterSerialNumber(meterSerialNumber string) error {
-	e.data.SetHasMeter(false)
+func (e *EnergyGuard) onTic2WebsocketErrorCannotFindMeterSerialNumber(meterSerialNumber string) error {
+	e.data.SetHasMeterData(false)
 	err := fmt.Errorf("TIC2WebsocketClient cannot find meter serial number '%s'", meterSerialNumber)
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
-	e.clearTIC2WebsocketSubscriptionIdAndAvailableTIC()
+	e.clearTic2WebsocketSubscriptionIdAndAvailableTic()
 	return err
 }
 
-func (e *EnergyGuard) onTIC2WebsocketErrorNoMeterSerialNumberAvailable() error {
-	e.data.SetHasMeter(false)
+func (e *EnergyGuard) onTic2WebsocketErrorNoMeterSerialNumberAvailable() error {
+	e.data.SetHasMeterData(false)
 	err := fmt.Errorf("TIC2WebsocketClient has no meter serial number available")
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
-	e.clearTIC2WebsocketSubscriptionIdAndAvailableTIC()
+	e.clearTic2WebsocketSubscriptionIdAndAvailableTic()
 	return err
 }
 
-func (e *EnergyGuard) onTIC2WebsocketErrorSubscriptionFailure(availableTIC linkymeter.TICIdentifier, err error) error {
-	e.data.SetHasMeter(false)
+func (e *EnergyGuard) onTic2WebsocketErrorSubscriptionFailure(availableTIC linkymeter.TicIdentifier, err error) error {
+	e.data.SetHasMeterData(false)
 	err = fmt.Errorf("TIC2WebsocketClient cannot subscribe with available TIC '%+v' : %s", availableTIC, err.Error())
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 	e.clearTIC2WebsocketSubscriptionId()
@@ -835,7 +877,7 @@ func (e *EnergyGuard) onVehicleDisconnected() {
 // onVehicleOPEVSupported
 func (e *EnergyGuard) onVehicleOPEVSupported() {
 	log.Info("Vehicle OPEV is supported")
-	e.onUsecaseSuccess()
+	e.onOpevUseCaseSupported()
 }
 
 // OnWallboxData
@@ -853,7 +895,7 @@ func (e *EnergyGuard) onWallboxConnected() {
 
 // OnWallboxDisconnected
 func (e *EnergyGuard) onWallboxDisconnected() {
-	e.data.SetHasOPEV(false)
+	e.data.SetIsOpevSupported(false)
 	err := fmt.Errorf("wallbox has been disconnected")
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
@@ -865,55 +907,55 @@ func (e *EnergyGuard) onWallboxSupported() {
 }
 
 func (e *EnergyGuard) onReadUsecaseInfosErrorNoLocalDeviceFound() {
-	e.data.SetHasOPEV(false)
+	e.data.SetIsOpevSupported(false)
 	err := fmt.Errorf("read use case info failure : no local device found")
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
 func (e *EnergyGuard) onReadUsecaseInfosErrorExpectedLocalEntityFound() {
-	e.data.SetHasOPEV(false)
-	err := fmt.Errorf("read use case info failure : expected local entity '%s' not found", ENTITY_TYPE)
+	e.data.SetIsOpevSupported(false)
+	err := fmt.Errorf("read use case info failure : expected local entity '%s' not found", entity_type)
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
 func (e *EnergyGuard) onReadUsecaseInfosErrorExpectedLocalFeatureNotFound(featureType model.FeatureTypeType) {
-	e.data.SetHasOPEV(false)
+	e.data.SetIsOpevSupported(false)
 	err := fmt.Errorf("read use case info failure : expected local feature '%s' not found", featureType)
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
 func (e *EnergyGuard) onReadUsecaseInfosErrorNoRemoteDeviceFound() {
-	e.data.SetHasOPEV(false)
+	e.data.SetIsOpevSupported(false)
 	err := fmt.Errorf("read use case info failure : no remote device found")
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
 func (e *EnergyGuard) onReadUsecaseInfosErrorExpectedRemoteFeatureNotFound(featureType model.FeatureTypeType) {
-	e.data.SetHasOPEV(false)
+	e.data.SetIsOpevSupported(false)
 	err := fmt.Errorf("read use case info failure : expected remote feature '%s' not found", featureType)
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
 func (e *EnergyGuard) onReadUsecaseInfosErrorNoRemoteDeviceSenderFound() {
-	e.data.SetHasOPEV(false)
+	e.data.SetIsOpevSupported(false)
 	err := fmt.Errorf("read use case info failure : no remote device sender found")
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
 func (e *EnergyGuard) onReadUsecaseInfosErrorSendRequestFailed(function model.FunctionType, err error) {
-	e.data.SetHasOPEV(false)
+	e.data.SetIsOpevSupported(false)
 	err = fmt.Errorf("read use case info failure : send request %v failed (%v)", function, err)
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
 func (e *EnergyGuard) onReadUsecaseInfosErrorSendRequestMsgCounterNotDefined(function model.FunctionType) {
-	e.data.SetHasOPEV(false)
+	e.data.SetIsOpevSupported(false)
 	err := fmt.Errorf("read use case info failure : send request %v message counter not defined", function)
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
 func (e *EnergyGuard) onReadUsecaseInfosErrorAddCallbackResponseFailed(function model.FunctionType, err error) {
-	e.data.SetHasOPEV(false)
+	e.data.SetIsOpevSupported(false)
 	err = fmt.Errorf("read use case info failure : cannot add response callback for function %v (%v)", function, err)
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
@@ -921,12 +963,12 @@ func (e *EnergyGuard) onReadUsecaseInfosErrorAddCallbackResponseFailed(function 
 func (e *EnergyGuard) onReceiveUsecasesInfos(msg spineapi.ResponseMessage) {
 	e.Debugf("onReceiveUsecasesInfos : %+v", msg)
 	if msg.Data == nil {
-		e.onUsecaseErrorDataNotProvided()
+		e.onOpevUsecaseErrorDataNotProvided()
 		return
 	}
 	data, ok := msg.Data.(*model.NodeManagementUseCaseDataType)
 	if !ok {
-		e.onUsecaseErrorDataTypeUnexpected(msg.Data)
+		e.onOpevUsecaseErrorDataTypeUnexpected(msg.Data)
 		return
 	}
 	for _, info := range data.UseCaseInformation {
@@ -934,109 +976,109 @@ func (e *EnergyGuard) onReceiveUsecasesInfos(msg spineapi.ResponseMessage) {
 			if support.UseCaseName == nil {
 				continue
 			}
-			if *support.UseCaseName == OPEV_USE_CASE_NAME {
+			if *support.UseCaseName == opev_use_case_name {
 				if support.UseCaseAvailable == nil {
-					e.onUsecaseErrorAvailableNotDefined()
+					e.onOpevUsecaseErrorAvailableNotDefined()
 					return
 				}
 				if !*support.UseCaseAvailable {
-					e.onUsecaseErrorNotAvailable()
+					e.onOpevUsecaseErrorNotAvailable()
 					return
 				}
 				if support.UseCaseVersion == nil {
-					e.onUsecaseErrorVersionNotDefined()
+					e.onOpevUsecaseErrorVersionNotDefined()
 					return
 				}
-				if *support.UseCaseVersion != OPEV_USE_CASE_VERSION {
-					e.onUsecaseErrorVersionUnexpected(*support.UseCaseVersion)
+				if *support.UseCaseVersion != opev_use_case_version {
+					e.onOpevUsecaseErrorVersionUnexpected(*support.UseCaseVersion)
 					return
 				}
 				if len(support.ScenarioSupport) == 0 {
-					e.onUsecaseErrorScenarioNotDefined()
+					e.onOpevUsecaseErrorScenarioNotDefined()
 					return
 				}
-				if !cmp.Equal(support.ScenarioSupport, OPEV_USE_CASE_SCENARIO) {
-					e.onUsecaseErrorScenarioUnexpected(support.ScenarioSupport)
+				if !cmp.Equal(support.ScenarioSupport, opev_use_case_scenario) {
+					e.onOpevUsecaseErrorScenarioUnexpected(support.ScenarioSupport)
 					return
 				}
 				if support.UseCaseDocumentSubRevision == nil {
-					e.onUsecaseErrorDocumentSubRevisionNotDefined()
+					e.onOpevUsecaseErrorDocumentSubRevisionNotDefined()
 					return
 				}
-				if *support.UseCaseDocumentSubRevision != OPEV_USE_CASE_DUCUMENT_SUB_REVISION {
-					e.onUsecaseErrorDocumentSubRevisionUnexpected(*support.UseCaseDocumentSubRevision)
+				if *support.UseCaseDocumentSubRevision != opev_use_case_document_sub_revision {
+					e.onOpevUsecaseErrorDocumentSubRevisionUnexpected(*support.UseCaseDocumentSubRevision)
 					return
 				}
-				e.onUsecaseSuccess()
+				e.onOpevUseCaseSupported()
 			}
 		}
 	}
 }
 
-func (e *EnergyGuard) onUsecaseSuccess() {
-	e.data.SetHasOPEV(true)
-	if e.data.HasMeter() && e.data.IsConnected() {
+func (e *EnergyGuard) onOpevUseCaseSupported() {
+	e.data.SetIsOpevSupported(true)
+	if e.data.HasMeterData() && e.data.IsConnected() {
 		e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeNormalOperation, model.LastErrorCodeType(data.DIAGNOSIS_NO_ERROR))
 	}
 }
 
-func (e *EnergyGuard) onUsecaseErrorDataNotProvided() {
-	e.data.SetHasOPEV(false)
+func (e *EnergyGuard) onOpevUsecaseErrorDataNotProvided() {
+	e.data.SetIsOpevSupported(false)
 	err := fmt.Errorf("OPEV use case data not provided")
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
-func (e *EnergyGuard) onUsecaseErrorDataTypeUnexpected(data any) {
-	e.data.SetHasOPEV(false)
+func (e *EnergyGuard) onOpevUsecaseErrorDataTypeUnexpected(data any) {
+	e.data.SetIsOpevSupported(false)
 	err := fmt.Errorf("OPEV use case data type '%v' unexpected (should be NodeManagementUseCaseDataType)", reflect.TypeOf(data))
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
-func (e *EnergyGuard) onUsecaseErrorAvailableNotDefined() {
-	e.data.SetHasOPEV(false)
+func (e *EnergyGuard) onOpevUsecaseErrorAvailableNotDefined() {
+	e.data.SetIsOpevSupported(false)
 	err := fmt.Errorf("OPEV use case available not defined")
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
-func (e *EnergyGuard) onUsecaseErrorNotAvailable() {
-	e.data.SetHasOPEV(false)
+func (e *EnergyGuard) onOpevUsecaseErrorNotAvailable() {
+	e.data.SetIsOpevSupported(false)
 	err := fmt.Errorf("OPEV use case not available")
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
-func (e *EnergyGuard) onUsecaseErrorVersionNotDefined() {
-	e.data.SetHasOPEV(false)
+func (e *EnergyGuard) onOpevUsecaseErrorVersionNotDefined() {
+	e.data.SetIsOpevSupported(false)
 	err := fmt.Errorf("OPEV use case version not defined")
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
-func (e *EnergyGuard) onUsecaseErrorVersionUnexpected(version model.SpecificationVersionType) {
-	e.data.SetHasOPEV(false)
-	err := fmt.Errorf("OPEV use case version '%s' unexpected (should be '%s')", version, OPEV_USE_CASE_VERSION)
+func (e *EnergyGuard) onOpevUsecaseErrorVersionUnexpected(version model.SpecificationVersionType) {
+	e.data.SetIsOpevSupported(false)
+	err := fmt.Errorf("OPEV use case version '%s' unexpected (should be '%s')", version, opev_use_case_version)
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
-func (e *EnergyGuard) onUsecaseErrorScenarioNotDefined() {
-	e.data.SetHasOPEV(false)
+func (e *EnergyGuard) onOpevUsecaseErrorScenarioNotDefined() {
+	e.data.SetIsOpevSupported(false)
 	err := fmt.Errorf("OPEV use case scenario not defined")
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
-func (e *EnergyGuard) onUsecaseErrorScenarioUnexpected(scenario []model.UseCaseScenarioSupportType) {
-	e.data.SetHasOPEV(false)
-	err := fmt.Errorf("OPEV use case scenario '%v' unexpected (should be '%v')", scenario, OPEV_USE_CASE_SCENARIO)
+func (e *EnergyGuard) onOpevUsecaseErrorScenarioUnexpected(scenario []model.UseCaseScenarioSupportType) {
+	e.data.SetIsOpevSupported(false)
+	err := fmt.Errorf("OPEV use case scenario '%v' unexpected (should be '%v')", scenario, opev_use_case_scenario)
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
-func (e *EnergyGuard) onUsecaseErrorDocumentSubRevisionNotDefined() {
-	e.data.SetHasOPEV(false)
+func (e *EnergyGuard) onOpevUsecaseErrorDocumentSubRevisionNotDefined() {
+	e.data.SetIsOpevSupported(false)
 	err := fmt.Errorf("OPEV use case document sub revision not defined")
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
-func (e *EnergyGuard) onUsecaseErrorDocumentSubRevisionUnexpected(subRevision string) {
-	e.data.SetHasOPEV(false)
-	err := fmt.Errorf("OPEV use case document sub revision '%s' unexpected (should be '%s')", subRevision, OPEV_USE_CASE_DUCUMENT_SUB_REVISION)
+func (e *EnergyGuard) onOpevUsecaseErrorDocumentSubRevisionUnexpected(subRevision string) {
+	e.data.SetIsOpevSupported(false)
+	err := fmt.Errorf("OPEV use case document sub revision '%s' unexpected (should be '%s')", subRevision, opev_use_case_document_sub_revision)
 	e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeFailure, model.LastErrorCodeType(err.Error()))
 }
 
@@ -1058,7 +1100,7 @@ func (e *EnergyGuard) onVehicleLoadControlLimitsWritten(result model.ResultDataT
 }
 
 func (e *EnergyGuard) onVehicleLoadControlLimitsSuccess() {
-	if e.data.HasMeter() && e.data.IsConnected() {
+	if e.data.HasMeterData() && e.data.IsConnected() {
 		e.updateDiagnosis(model.DeviceDiagnosisOperatingStateTypeNormalOperation, data.DIAGNOSIS_NO_ERROR)
 	}
 }

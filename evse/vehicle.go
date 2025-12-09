@@ -3,6 +3,33 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+/*
+Package evse implements electrical vehicle and wallbox routines for data update and charge limitation modification.
+
+The electrical vehicle referred to as "EV" in EEBus protocol is responsible for following scenarios:
+
+  - notifying wallbox when it is connected or disconnected
+
+  - provide data to wallbox (charge state, communication standard, identifications, manufacturer data, charging power limits, etc.)
+
+  - apply charge limitations received from wallbox (current limits, load control limits)
+
+The wallbox referred to as "EVSE" in EEBus protocol is responsible for following scenarios:
+
+  - establishing and maintaining EEBus connection with EV
+
+  - providing data to energy management system (charge state, communication standard, identifications, manufacturer data, charging power limits, phases connected, current per phase, power per phase, energy charged, current limits, load control limits)
+
+  - sending charge limitations to EV (current limits, load control limits)
+
+  - notifying energy management system when EV is connected or disconnected
+
+  - notifying energy management system when OPEV use case is supported by EV
+
+  - checking energy management system availability and applying default charge limitations when necessary
+
+  - checking energy management system error state and applying default charge limitations when necessary
+*/
 package evse
 
 import (
@@ -25,60 +52,102 @@ import (
 )
 
 const (
-	VEHICLE_USE_CASE_SUPPORTED = "UseCaseSupported"
-	VEHICLE_USE_CASE_EVCC      = "EVCC"
-	VEHICLE_USE_CASE_EVCEM     = "EVCEM"
-	VEHICLE_USE_CASE_OPEV      = "OPEV"
-	// EVCC datas
-	VEHICLE_IS_CONNECTED               = "IsConnected"
-	VEHICLE_CHARGE_STATE               = "ChargeState"
-	VEHICLE_COMMUNICATION_STANDARD     = "CommunicationStandard"
-	VEHICLE_ASYMETRIC_CHARGING_SUPPORT = "AsymetricChargingSupport"
-	VEHICLE_IDENTIFICATIONS            = "Identifications"
-	VEHICLE_MANUFACTURER_DATA          = "ManufacturerData"
-	VEHICLE_CHARGING_POWER_LIMITS      = "ChargingPowerLimits"
-	VEHICLE_IS_IN_SLEEP_MODE           = "IsInSleepMode"
-	// EVCEM datas
-	VEHICLE_PHASES_CONNECTED  = "PhasesConnected"
-	VEHICLE_CURRENT_PER_PHASE = "CurrentPerPhase"
-	VEHICLE_POWER_PER_PHASE   = "PowerPerPhase"
-	VEHICLE_ENERGY_CHARGED    = "EnergyCharged"
-	// OPEV datas
-	VEHICLE_CURRENT_LIMITS      = "CurrentLimits"
-	VEHICLE_LOAD_CONTROL_LIMITS = "LoadControlLimits"
+	vehicle_use_case_supported = "UseCaseSupported"
+	vehicle_use_case_evcc      = "EVCC"
+	vehicle_use_case_evcem     = "EVCEM"
+	vehicle_use_case_opev      = "OPEV"
 )
 
+// EVCC vehicle data key used for connection state (true/false)
+const VEHICLE_IS_CONNECTED = "IsConnected"
+
+// EVCC vehicle data key used for charge state
+//
+// See also: https://pkg.go.dev/github.com/enbility/eebus-go@v0.7.0/usecases/api#EVChargeStateType
+const VEHICLE_CHARGE_STATE = "ChargeState"
+
+// EVCC vehicle data key used for communication standard
+//
+// See also: https://pkg.go.dev/github.com/enbility/spine-go@v0.7.0/model#DeviceConfigurationKeyValueStringType
+const VEHICLE_COMMUNICATION_STANDARD = "CommunicationStandard"
+
+// EVCC vehicle data key used for asymetric charging support (true/false)
+const VEHICLE_ASYMETRIC_CHARGING_SUPPORT = "AsymetricChargingSupport"
+
+// EVCC vehicle data key used for a list of IdentificationItem
+//
+// See also: https://pkg.go.dev/github.com/enbility/eebus-go@v0.7.0/usecases/api#IdentificationItem
+const VEHICLE_IDENTIFICATIONS = "Identifications"
+
+// EVCC vehicle data key used for manufacturer data
+//
+// See also: https://pkg.go.dev/github.com/enbility/eebus-go@v0.7.0/api#ManufacturerData
+const VEHICLE_MANUFACTURER_DATA = "ManufacturerData"
+
+// EVCC vehicle data key used for charging power limits
+//
+// See [ChargingPowerLimits]
+const VEHICLE_CHARGING_POWER_LIMITS = "ChargingPowerLimits"
+
+// EVCC vehicle data key used for sleep mode (true/false)
+const VEHICLE_IS_IN_SLEEP_MODE = "IsInSleepMode"
+
+// EVCEM vehicle data key used for number of phases connected (1, 2 or 3)
+const VEHICLE_PHASES_CONNECTED = "PhasesConnected"
+
+// EVCEM vehicle data key used for a list of current per phase in Amps
+const VEHICLE_CURRENT_PER_PHASE = "CurrentPerPhase"
+
+// EVCEM vehicle data key used for a list power per phase in Watts
+const VEHICLE_POWER_PER_PHASE = "PowerPerPhase"
+
+// EVCEM vehicle data key used for energy charged in kWh
+const VEHICLE_ENERGY_CHARGED = "EnergyCharged"
+
+// OPEV vehicle data key used for current limits
+//
+// See [CurrentLimits]
+const VEHICLE_CURRENT_LIMITS = "CurrentLimits"
+
+// OPEV vehicle data key used for load control limits
+//
+// See also: https://pkg.go.dev/github.com/enbility/eebus-go@v0.7.0/usecases/api#LoadLimitsPhase
+const VEHICLE_LOAD_CONTROL_LIMITS = "LoadControlLimits"
+
+// ChargingPowerLimits represents the charging power limits of the vehicle
 type ChargingPowerLimits struct {
-	Min     float64
-	Max     float64
-	Standby float64
+	Min     float64 // minimum charging power in Watts
+	Max     float64 // maximum charging power in Watts
+	Standby float64 // standby power in Watts
 }
 
+// CurrentLimits represents the charging current limits of the vehicle
 type CurrentLimits struct {
-	Min     []float64
-	Max     []float64
-	Default []float64
+	Min     []float64 // minimum current limits in Amps
+	Max     []float64 // maximum current limits in Amps
+	Default []float64 // default current limits in Amps
 }
 
-type OnVehicleData func(vehicleData map[string]interface{})
-type OnVehicleResult func(result model.ResultDataType)
-type OnVehicleConnected func()
-type OnVehicleDisconnected func()
-type OnVehicleOPEVSupported func()
+type onVehicleData func(vehicleData map[string]interface{})
+type onVehicleResult func(result model.ResultDataType)
+type onVehicleConnected func()
+type onVehicleDisconnected func()
+type onVehicleOpevSupported func()
 
-type VehicleDataSubscriber struct {
-	onData          OnVehicleData
-	onConnected     OnVehicleConnected
-	onDisconnected  OnVehicleDisconnected
-	onOPEVSupported OnVehicleOPEVSupported
+type vehicleEventSubscriber struct {
+	onData          onVehicleData
+	onConnected     onVehicleConnected
+	onDisconnected  onVehicleDisconnected
+	onOpevSupported onVehicleOpevSupported
 }
 
+// Vehicle handle an electrical vehicle and its data
 type Vehicle struct {
 	data             map[string]interface{}
 	dataAccess       sync.Mutex
 	config           config.VehicleConfig
 	subscriberAccess sync.Mutex
-	subscriberMap    map[string]VehicleDataSubscriber
+	subscriberMap    map[string]vehicleEventSubscriber
 	useCase          struct {
 		evcc struct {
 			supported atomic.Bool
@@ -99,6 +168,7 @@ type Vehicle struct {
 	job              *gocron.Job
 }
 
+// NewVehicle creates a new Vehicle instance with given EEBUS service, local entity and vehicle configuration
 func NewVehicle(
 	service api.ServiceInterface,
 	localEntity spineapi.EntityLocalInterface,
@@ -108,7 +178,7 @@ func NewVehicle(
 
 	vehicle.data = make(map[string]interface{})
 	vehicle.config = config
-	vehicle.subscriberMap = make(map[string]VehicleDataSubscriber)
+	vehicle.subscriberMap = make(map[string]vehicleEventSubscriber)
 
 	vehicle.useCase.evcc.handler = evcc.NewEVCC(service, localEntity, vehicle.onEvent_EVCC)
 	vehicle.useCase.evcc.supported.Store(false)
@@ -128,16 +198,25 @@ func NewVehicle(
 	return vehicle
 }
 
+// EnableRemoteConnection enables the remote connection to the vehicle
+//
+// The remote connection is enable by the energy management system when the EEBUS connection with the wallbox is established.
+// When the remote connection is enabled, all data available are read from the vehicle.
 func (v *Vehicle) EnableRemoteConnection() {
 	v.remoteConnection.Store(true)
 }
 
+// DisableRemoteConnection disables the remote connection to the vehicle
+//
+// The remote connection is disabled by the energy management system when the EEBUS connection with the wallbox is closed.
+// When the remote connection is disabled, all data are cleared (if not persistent) and no data is read from the vehicle.
 func (v *Vehicle) DisableRemoteConnection() {
 	v.remoteConnection.Store(false)
 }
 
-func (v *Vehicle) SubscribeData(onData OnVehicleData, onConnected OnVehicleConnected, onDisconnected OnVehicleDisconnected, onOPEVSupported OnVehicleOPEVSupported) (id string) {
-	subscriber := VehicleDataSubscriber{onData: onData, onConnected: onConnected, onDisconnected: onDisconnected, onOPEVSupported: onOPEVSupported}
+// SubscribeData subscribes to vehicle data updates, connection and disconnection events, OPEV supported notification and returns a subscription ID
+func (v *Vehicle) SubscribeData(onData onVehicleData, onConnected onVehicleConnected, onDisconnected onVehicleDisconnected, onOPEVSupported onVehicleOpevSupported) (id string) {
+	subscriber := vehicleEventSubscriber{onData: onData, onConnected: onConnected, onDisconnected: onDisconnected, onOpevSupported: onOPEVSupported}
 	id = uuid.New().String()
 	v.subscriberAccess.Lock()
 	v.subscriberMap[id] = subscriber
@@ -146,6 +225,7 @@ func (v *Vehicle) SubscribeData(onData OnVehicleData, onConnected OnVehicleConne
 	return id
 }
 
+// UnsubscribeData unsubscribes from vehicle data updates, connection and disconnection events, OPEV supported notification using the subscription ID
 func (v *Vehicle) UnsubscribeData(id string) error {
 	_, ok := v.subscriberMap[id]
 	if !ok {
@@ -186,7 +266,7 @@ func (v *Vehicle) notifyDisconnected() {
 func (v *Vehicle) notifyOPEVSupported() {
 	v.subscriberAccess.Lock()
 	for _, subscriber := range v.subscriberMap {
-		go subscriber.onOPEVSupported()
+		go subscriber.onOpevSupported()
 	}
 	v.subscriberAccess.Unlock()
 }
@@ -205,6 +285,7 @@ func (v *Vehicle) reset() {
 	v.useCase.opev.supported.Store(false)
 }
 
+// IsConnected returns true if the vehicle is connected with the wallbox, false otherwise
 func (v *Vehicle) IsConnected() bool {
 	var isConnected bool
 
@@ -227,6 +308,7 @@ func (v *Vehicle) setIsConnected(isConnected bool) {
 	v.dataAccess.Unlock()
 }
 
+// GetData returns a copy of the vehicle data map
 func (v *Vehicle) GetData() map[string]interface{} {
 	data := make(map[string]interface{})
 
@@ -535,10 +617,12 @@ func (v *Vehicle) readAndSetLoadControlLimits() ([]ucapi.LoadLimitsPhase, error)
 	return loadControlLimits, error
 }
 
-func (v *Vehicle) WriteLoadControlLimits(limits []ucapi.LoadLimitsPhase, onResult OnVehicleResult) (*model.MsgCounterType, error) {
+// WriteLoadControlLimits send the load limits request to the vehicle with a given callback called on vehicle result and returns a message counter or an error
+func (v *Vehicle) WriteLoadControlLimits(limits []ucapi.LoadLimitsPhase, onResult onVehicleResult) (*model.MsgCounterType, error) {
 	return v.useCase.opev.handler.WriteLoadControlLimits(v.remoteEntity, limits, onResult)
 }
 
+// EVCC Event Handler
 func (v *Vehicle) onEvent_EVCC(ski string, device spineapi.DeviceRemoteInterface, entity spineapi.EntityRemoteInterface, event api.EventType) {
 	var dataName string
 	var data interface{}
@@ -547,14 +631,14 @@ func (v *Vehicle) onEvent_EVCC(ski string, device spineapi.DeviceRemoteInterface
 	if !v.remoteConnection.Load() {
 		return
 	}
-	useCaseName := VEHICLE_USE_CASE_EVCC
+	useCaseName := vehicle_use_case_evcc
 	error = nil
 	v.remoteEntity = entity
 
 	switch event {
 	case evcc.UseCaseSupportUpdate:
 		v.useCase.evcc.supported.Store(true)
-		dataName = VEHICLE_USE_CASE_SUPPORTED
+		dataName = vehicle_use_case_supported
 		data = true
 	case evcc.EvConnected:
 		v.setIsConnected(true)
@@ -601,7 +685,6 @@ func (v *Vehicle) onEvent_EVCC(ski string, device spineapi.DeviceRemoteInterface
 }
 
 // EVCEM Event Handler
-
 func (v *Vehicle) onEvent_EVCEM(ski string, device spineapi.DeviceRemoteInterface, entity spineapi.EntityRemoteInterface, event api.EventType) {
 	var dataName string
 	var data interface{}
@@ -610,13 +693,13 @@ func (v *Vehicle) onEvent_EVCEM(ski string, device spineapi.DeviceRemoteInterfac
 	if !v.remoteConnection.Load() {
 		return
 	}
-	useCaseName := VEHICLE_USE_CASE_EVCEM
+	useCaseName := vehicle_use_case_evcem
 	error = nil
 
 	switch event {
 	case evcem.UseCaseSupportUpdate:
 		v.useCase.evcc.supported.Store(true)
-		dataName = VEHICLE_USE_CASE_SUPPORTED
+		dataName = vehicle_use_case_supported
 		data = true
 	case evcem.DataUpdatePhasesConnected:
 		data, error = v.readAndSetPhasesConnected()
@@ -641,7 +724,6 @@ func (v *Vehicle) onEvent_EVCEM(ski string, device spineapi.DeviceRemoteInterfac
 }
 
 // OPEV Event Handler
-
 func (v *Vehicle) onEvent_OPEV(ski string, device spineapi.DeviceRemoteInterface, entity spineapi.EntityRemoteInterface, event api.EventType) {
 	var dataName string
 	var data interface{}
@@ -650,13 +732,13 @@ func (v *Vehicle) onEvent_OPEV(ski string, device spineapi.DeviceRemoteInterface
 	if !v.remoteConnection.Load() {
 		return
 	}
-	useCaseName := VEHICLE_USE_CASE_OPEV
+	useCaseName := vehicle_use_case_opev
 	error = nil
 
 	switch event {
 	case opev.UseCaseSupportUpdate:
 		v.useCase.opev.supported.Store(true)
-		dataName = VEHICLE_USE_CASE_SUPPORTED
+		dataName = vehicle_use_case_supported
 		data = true
 		v.notifyOPEVSupported()
 	case opev.DataUpdateCurrentLimits:

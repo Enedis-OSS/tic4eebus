@@ -37,6 +37,16 @@ DataModel:
     IpAddress : "127.0.0.1"
     TcpPort : 8086
 TeleInformationClient:
+<<<<<<< HEAD
+  Tic2Websocket:
+    IpAddress: "127.0.0.1"
+    TcpPort: 19584
+  TicIdentifier:
+    SerialNumber: ""
+Eebus:
+  ServerPort: 4817
+  RemoteSki: "0123456789abcdef01234567890abcdef0123456"
+=======
   TIC2Websocket:
     IPAddress: "127.0.0.1"
     TCPPort: 19584
@@ -45,6 +55,7 @@ TeleInformationClient:
 EEBUS:
   ServerPort: 4817
   RemoteSKI: "0123456789abcdef01234567890abcdef0123456"
+>>>>>>> main
   CertificateFilePath: "../examples/energy-guard.cert"
   PrivateKeyFilePath: "../examples/energy-guard.key"
   VendorCode: "i:12345"

@@ -10,20 +10,33 @@ import (
 	"strconv"
 )
 
+// MeterData represents the Linky meter data
 type MeterData struct {
-	SerialNumber                 string    `json:"SerialNumber"`
-	DateTime                     string    `json:"DateTime,omitempty"`
-	BreakerOpened                bool      `json:"BreakerOpened"`
-	PhaseCount                   int       `json:"PhaseCount"`
-	OverLoadPowerLimit           int       `json:"OverLoadPowerLimit"`
+	// The Linky meter serial number
+	SerialNumber string `json:"SerialNumber"`
+	// The Linky meter date time in format "yy/MM/dd HH:mm:ss"
+	DateTime string `json:"DateTime,omitempty"`
+	// Whether the Linky meter breaker is opened (true) or closed (false)
+	BreakerOpened bool `json:"BreakerOpened"`
+	// The Linky meter phase count (1 or 3)
+	PhaseCount int `json:"PhaseCount"`
+	// The Linky meter overload power limit in VA
+	OverLoadPowerLimit int `json:"OverLoadPowerLimit"`
+	// The Linky meter overload current limit per phase in A
 	OverLoadCurrentLimitPerPhase []float64 `json:"OverLoadCurrentLimitPerPhase"`
-	RmsVoltagePerPhase           []int     `json:"RmsVoltagePerPhase"`
-	RmsCurrentPerPhase           []float64 `json:"RmsCurrentPerPhase"`
-	ApparentImportPower          int       `json:"ApparentImportPower"`
-	ApparentImportPowerPerPhase  []int     `json:"ApparentImportPowerPerPhase,omitempty"`
-	AvailableCurrentPerPhase     []float64 `json:"AvailableCurrentPerPhase"`
+	// The Linky meter RMS voltage per phase in V
+	RmsVoltagePerPhase []int `json:"RmsVoltagePerPhase"`
+	// The Linky meter RMS current per phase in A
+	RmsCurrentPerPhase []float64 `json:"RmsCurrentPerPhase"`
+	// The Linky meter total apparent import power in VA
+	ApparentImportPower int `json:"ApparentImportPower"`
+	// The Linky meter apparent import power per phase in VA
+	ApparentImportPowerPerPhase []int `json:"ApparentImportPowerPerPhase,omitempty"`
+	// The Linky meter available current per phase in A
+	AvailableCurrentPerPhase []float64 `json:"AvailableCurrentPerPhase"`
 }
 
+// IsEqual checks if two MeterData instances are equal
 func IsEqual(meter MeterData, other MeterData) bool {
 	if meter.SerialNumber != other.SerialNumber {
 		return false
@@ -87,6 +100,10 @@ func IsEqual(meter MeterData, other MeterData) bool {
 	return true
 }
 
+// ComputeMeterData computes the Linky meter data from the TIC content
+//
+// It works for STANDARD and HISTORIC TIC formats (see https://www.enedis.fr/media/2027/download).
+// It returns an empty MeterData if the TIC content is nil
 func ComputeMeterData(ticContent map[string]string) MeterData {
 	var meterData MeterData
 	// Check tic content

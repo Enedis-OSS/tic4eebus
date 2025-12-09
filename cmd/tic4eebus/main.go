@@ -3,6 +3,27 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+/*
+tic4eebus handles electrical vehicle charge according to available energy provided by the Linky meter.
+It uses a configuration file to change application behaviour.
+
+Usage:
+
+	tic4eebus [flags]
+
+The flags are:
+
+	-configFilePath string
+		Set the configuration file path (default "examples/config.yaml")
+	-help
+		Show help
+	-version
+		Show software version
+
+When tic4eebus starts, it connects to the Eebus wallbox and receive the Linky meter
+data using TIC2WebSocket API periodically (from 1 to 3 seconds) using configurations parameters specified.
+According to the available energy, it decides to increase or decrease the charge of the electric vehicle.
+*/
 package main
 
 import (
@@ -22,32 +43,33 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Command line inputs.
 type Inputs struct {
 	configFilePath string
 	showVersion    bool
 }
 
+// Log formatter
 type PlainFormatter struct {
 	TimestampFormat string
 }
 
 const (
-	DEFAULT_CONFIG_FILE_PATH = "config.yaml"
-	VERSION                  = "v1.1.0"
+	VERSION = "v1.1.1"
 )
 
 var (
-	DEFAULT_LOG_FILE = filepath.Join("var", "log", "SmartOverloadProtection.log")
-	energyGuard      *ems.EnergyGuard
+	energyGuard *ems.EnergyGuard
 )
 
+// Format renders a single log entry with timestamp Level and message.
 func (f *PlainFormatter) Format(entry *log.Entry) ([]byte, error) {
 	timestamp := entry.Time.Format(f.TimestampFormat)
 	return []byte(fmt.Sprintf("%s %s %s\n", timestamp, strings.ToUpper(entry.Level.String()), entry.Message)), nil
 }
 
 func parseCommandLine() (inputs Inputs) {
-	flag.StringVar(&inputs.configFilePath, "configFilePath", DEFAULT_CONFIG_FILE_PATH, "Set the configuration file path")
+	flag.StringVar(&inputs.configFilePath, "configFilePath", filepath.Join("examples", "config.yaml"), "Set the configuration file path")
 	flag.BoolVar(&inputs.showVersion, "version", false, "Show software version")
 	flag.Parse()
 
@@ -61,8 +83,9 @@ func parseCommandLine() (inputs Inputs) {
 }
 
 func initLogger(logConfig config.LogConfig) {
+	// Set log level
 	log.SetLevel(logConfig.Level)
-
+	// Compute log rotation parameters
 	logFileExtension := filepath.Ext(logConfig.FilePath)
 	logFilePathWithoutExtension := strings.TrimSuffix(logConfig.FilePath, logFileExtension)
 	logFilePathWithPattern := logFilePathWithoutExtension + logConfig.Rotation.PeriodPattern + logFileExtension
@@ -74,14 +97,14 @@ func initLogger(logConfig config.LogConfig) {
 		rotatelogs.WithMaxAge(logMaxAge),
 		rotatelogs.WithRotationTime(logRotationTime),
 	)
-
+	// Check log creation
 	if err != nil {
 		log.Fatalf("Cannot create log: %v", err)
 	}
-
+	// Set log output to file and stdout
 	outputs := io.MultiWriter(logWriter, os.Stdout)
 	log.SetOutput(outputs)
-
+	// Set log format
 	log.SetFormatter(&PlainFormatter{
 		TimestampFormat: "2006-01-02 15:04:05",
 	})

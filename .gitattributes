@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2025 Enedis Smarties team <dt-dsi-nexus-lab-smarties@enedis.fr>
+# SPDX-FileContributor: Jehan BOUSCH
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Default line ending
+* text=auto
+
+# Force LF for Go files
+*.go text eol=lf
+
+# Other common text files
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf

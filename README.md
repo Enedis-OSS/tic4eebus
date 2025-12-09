@@ -7,94 +7,94 @@
 -->
 
 # tic4eebus
-*EEBUS OPEV use case with Linky customer interface (TIC) aiming to handle Electrical Vehicle charge according to available energy (PCOUP)*
+*Cas d'utilisation OPEV EEBUS OPEV avec la Télé Information Client (TIC) d'un compteur Linky pour gérer la charge d'un véhicule électrique en fonction de l'énergie disponible (PCOUP)*
 
-[![REUSE status](https://api.reuse.software/badge/git.fsfe.org/reuse/api)](https://api.reuse.software/info/git.fsfe.org/reuse/api)
+[![statut REUSE](https://api.reuse.software/badge/git.fsfe.org/reuse/api)](https://api.reuse.software/info/git.fsfe.org/reuse/api)
 
-[🇫🇷 Français](README.fr.md) | [🇺🇸 English](README.md)
+[🇫🇷 Français](README.md) | [🇺🇸 English](README.en.md)
 
-## Summary
+## Sommaire
 
 * [Introduction](#introduction)
 * [Installation](#installation)
 * [Documentation](#documentation)
-* [Contributing](#contrib)
+* [Contribuer](#contrib)
 * [Support](#support)
-* [Contributors](#contributors)
+* [Contributeurs](#contributors)
 
 ## <a name="introduction"></a> Introduction
 
-The **tic4eebus** application is used as a energy management system (referred as EnergyGuard in EEBUS documentation) using Linky customer interface (known as Télé Information Client or TIC)
-as metering source to control electrical vehicle charge through a wallbox (i.e the EEBUS interface).
+L'application **tic4eebus** est utilisée comme gestionnaire d'energie (EnergyGuard dans la documentation EEBUS) utilisant la Télé Information Client (TIC)
+du compteur Linky comme source de métrologie pour piloter la charge d'un véhicule électrique via une borne de recharge (interface EEBUS).
 
 ## <a name="installation"></a> Installation
 
-### Prerequisites
+### Prérequis
 
-To generate the application, you need to install :
+Pour générer l'application, vous avez besoin d'installer :
 
-- [Go](https://go.dev/doc/install)
+- [Go](https://fr.education-wiki.com/2324783-how-to-install-go)
 
-For application proper functioning, you need to install :
+Pour le bon fonctionnement de l'application, vous avez besoin d'installer :
 
 - [TIC2WebSocket](https://github.com/Enedis-OSS/TIC2WebSocket)
 
-### Build executable file
+### Générer le fichier exécutable
 
-When you are at the project root, simply type the following command:
+Lorsque vous êtes à la racine du projet, tapez simplement la commande suivante :
 
 ```bash 
 go build -o tic4eebus cmd/tic4eebus/main.go
 ```
 
-As a result, the *tic4eebus* executable file is created.
+En conséquence, le fichier exécutable *tic4eebus* est créé.
 
-### Starting the Application
+### Démarrage de l'Application
 
-To start the **tic4eebus** application, execute the commnand :
+Pour démarrer l'application **tic4eebus**, exécutez la commande :
 
 ```bash 
 ./tic4eebus
 ```
-*Note: For application **tic4eebus** proper functioning, application **TIC2WebSocket** must be started.*
+*Remarque: Pour le bon fonctionnement de l'application **tic4eebus** l'application **TIC2WebSocket** doit être démarrée.*
 
-### Help
+### Aide
 
-Add `--help` option to get basic information on how to use the application.
+Ajoutez l'option `--help` pour obtenir des informations de base sur l'utilisation de l'application.
 ```bash 
-./tic4eebus --help
+./tic4eebus.sh --help
 ```
 
 ### Version
 
-Add `--version` option to display the application version.
+Ajoutez l'option `--version` pour afficher la version de l'application.
 ```bash 
 ./tic4eebus --version
 ```
 
 ## <a name="documentation"></a> Documentation
 
-[TODO]
+Pour plus d'informations sur le fonctionnement de tic4eebus, consultez la [documentation officielle](https://enedis-oss.github.io/tic4eebus/).
 
-## <a name="contrib"></a> Contributing ?
+## <a name="contrib"></a> Contribuer ?
 
-![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
+![PRs Bienvenues](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
 
-You don't need to be a developer to contribute, nor do much, you can simply:
-* Enhance documentation,
-* Correct a spelling,
-* [Report a bug](https://github.com/Enedis-OSS/tic4eebus/issues/new/choose)
-* [Ask a feature](https://github.com/Enedis-OSS/tic4eebus/issues/new/choose)
-* [Give us advices or ideas](https://github.com/Enedis-OSS/tic4eebus/issues/new/choose),
+Vous n'avez pas besoin d'être développeur pour contribuer, ni de faire beaucoup, vous pouvez simplement :
+* Améliorer la documentation,
+* Corriger une faute d'orthographe,
+* [Signaler un bug](https://github.com/Enedis-OSS/tic4eebus/issues/new/choose)
+* [Demander une fonctionnalité](https://github.com/Enedis-OSS/tic4eebus/issues/new/choose)
+* [Nous donner des conseils ou des idées](https://github.com/Enedis-OSS/tic4eebus/issues/new/choose),
 * etc.
 
-To help you start, we invite you to read [Contributing](CONTRIBUTING.md), which gives you rules and code conventions to respect
+Pour vous aider à démarrer, nous vous invitons à lire [Contributing](CONTRIBUTING.fr.md), qui vous donne les règles et conventions de code à respecter
 
-To contribute to this documentation (README, CONTRIBUTING, etc.), we conform to the [CommonMark Spec](https://spec.commonmark.org/)
+Pour contribuer à cette documentation (README, CONTRIBUTING, etc.), nous nous conformons à la [CommonMark Spec](https://spec.commonmark.org/)
 
-## <a name="contributors"></a> Contributors
+## <a name="contributors"></a> Contributeurs
 
-Core contributors :
+Contributeurs principaux :
 * **Jehan BOUSCH** (<jehan-externe.bousch@enedis.fr>)
 
-We strive to provide a benevolent environment and support any [contribution](#contrib).
+Nous nous efforçons de fournir un environnement bienveillant et de soutenir toute [contribution](#contrib).

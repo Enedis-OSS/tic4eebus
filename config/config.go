@@ -3,6 +3,25 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+/*
+Package config implements utility routines for manipulating application configuration.
+
+The application configuration are grouped in the following categories:
+
+  - overload protection parameters
+
+  - vehicle parameters
+
+  - wallbox parameters
+
+  - log parameters
+
+  - data model parameters
+
+  - teleinformation client parameters
+
+  - eebus parameters
+*/
 package config
 
 import (
@@ -15,110 +34,137 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// Current limitation configuration for electric vehicle charge
 type CurrentLimitConfig struct {
-	ValueInAmps        float64
-	LockDelayInSeconds float64
+	ValueInAmps        float64 // Electric vehicle charge current limitation in Amps
+	LockDelayInSeconds float64 // Electric vehicle charge lock delay in seconds
 }
 
+// File rotation configuration for log and data model CSV files
 type FileRotationConfig struct {
-	PeriodInHours int
-	PeriodCount   int
-	PeriodPattern string
+	PeriodInHours int    // Rotation period in hours
+	PeriodCount   int    // Number of files to keep
+	PeriodPattern string // Rotation pattern, e.g. ".%Y%m%d%H"
 }
 
+// Data model CSV file configuration
 type CsvConfig struct {
-	FilePath string
-	Rotation FileRotationConfig
+	FilePath string             // CSV file path
+	Rotation FileRotationConfig // CSV file rotation configuration
 }
 
+// Data model InfluxDb configuration
 type InfluxDbConfig struct {
-	Bucket    string
-	Org       string
-	Token     string
-	IpAddress string
-	TcpPort   int
+	Bucket    string // InfluxDb bucket
+	Org       string // InfluxDb organization
+	Token     string // InfluxDb token
+	IpAddress string // InfluxDb server IP address
+	TcpPort   int    // InfluxDb server TCP port
 }
 
-type TIC2WebsocketConfig struct {
-	IPAddress string
-	TCPPort   int
+// TIC2WebSocket client configuration
+type Tic2WebsocketConfig struct {
+	IpAddress string // TIC2WebSocket server IP address
+	TcpPort   int    // TIC2WebSocket server TCP port
 }
 
-type TICIdentifierConfig struct {
-	SerialNumber string
+// TIC identifier configuration used for TIC2WebSocket client subscription
+type TicIdentifierConfig struct {
+	SerialNumber string // Linky meter serial number
 }
 
+// Overload protection configuration
 type OverloadProtectionConfig struct {
-	Enable                 bool
-	RunningPeriodInSeconds int
-	CurrentLimit           CurrentLimitConfig
+	Enable                 bool               // Enable/disable overload protection algorithm
+	RunningPeriodInSeconds int                // Overload protection algorithm running period in seconds
+	CurrentLimit           CurrentLimitConfig // Electric vehicle charge current limitation configuration
 }
 
+// Vehicle configuration
 type VehicleConfig struct {
-	UpdateDataPeriodInSeconds int
-	DataPersistent            bool
+	UpdateDataPeriodInSeconds int  // Vehicle data update period in seconds
+	DataPersistent            bool // Vehicle data persistent enable/disable
 }
 
+// Wallbox configuration
 type WallboxConfig struct {
-	UpdateDataPeriodInSeconds int
-	DataPersistent            bool
+	UpdateDataPeriodInSeconds int  // Wallbox data update period in seconds
+	DataPersistent            bool // Wallbox data persistent enable/disable
 }
 
+// Log configuration
 type LogConfig struct {
-	Level    log.Level
-	FilePath string
-	Rotation FileRotationConfig
+	Level    log.Level          // Log level
+	FilePath string             // Log file path
+	Rotation FileRotationConfig // Log file rotation configuration
 }
 
+// Data model configuration
 type DataModelConfig struct {
-	Csv      *CsvConfig
-	InfluxDb *InfluxDbConfig
+	Csv      *CsvConfig      // CSV file configuration or nil if not configured
+	InfluxDb *InfluxDbConfig // InfluxDb configuration or nil if not configured
 }
 
+// Teleinformation client configuration
 type TeleInformationClientConfig struct {
-	TIC2Websocket TIC2WebsocketConfig
-	TICIdentifier TICIdentifierConfig
+	Tic2Websocket Tic2WebsocketConfig // TIC2WebSocket client configuration
+	TicIdentifier TicIdentifierConfig // TIC identifier configuration
 }
 
-type EEBUSConfig struct {
-	ServerPort                int
-	RemoteSKI                 string
-	CertificateFilePath       string
-	PrivateKeyFilePath        string
-	VendorCode                string
-	DeviceBrand               string
-	DeviceModel               string
-	SerialNumber              string
-	HeartbeatTimeoutInSeconds int
+// EEBUS configuration
+type EebusConfig struct {
+	ServerPort                int    // EEBUS server TCP port
+	RemoteSki                 string // EEBUS remote SKI (SHA-1 hash, 40 hexadecimal digits)
+	CertificateFilePath       string // EEBUS certificate file path
+	PrivateKeyFilePath        string // EEBUS private key file path
+	VendorCode                string // EEBUS vendor code
+	DeviceBrand               string // EEBUS device brand
+	DeviceModel               string // EEBUS device model
+	SerialNumber              string // EEBUS device serial number
+	HeartbeatTimeoutInSeconds int    // EEBUS heartbeat timeout in seconds
 }
 
+// Application configuration structure
+// It groups all configuration categories
+// The configuration is loaded from a YAML file using LoadConfig() function
 type Config struct {
-	OverloadProtection    OverloadProtectionConfig
-	Vehicle               VehicleConfig
-	Wallbox               WallboxConfig
-	Log                   LogConfig
-	DataModel             DataModelConfig
-	TeleInformationClient TeleInformationClientConfig
-	EEBUS                 EEBUSConfig
+	OverloadProtection    OverloadProtectionConfig    // Overload protection configuration
+	Vehicle               VehicleConfig               // Vehicle configuration
+	Wallbox               WallboxConfig               // Wallbox configuration
+	Log                   LogConfig                   // Log configuration
+	DataModel             DataModelConfig             // Data model configuration
+	TeleInformationClient TeleInformationClientConfig // Teleinformation client configuration
+	Eebus                 EebusConfig                 // EEBUS configuration
 }
 
 const (
-	INVALID_PARAMETER = "invalid config parameter"
-	REMOTE_SKI_REGEXP = "^[a-fA-F0-9]{40}$" // SHA-1 hash is 20 bytes, represented as 40 hexadecimal digits
+	invalid_parameter = "invalid config parameter"
+	remote_ski_regexp = "^[a-fA-F0-9]{40}$" // SHA-1 hash is 20 bytes, represented as 40 hexadecimal digits
 )
 
+// Load configuration from configFilePath. copies from src to dst until either EOF is reached
+// on src or an error occurs. It returns the configuration loaded and the error encountered.
+//
+// A successful load returns err == nil.
 func LoadConfig(configFilePath string) (Config, error) {
 	var config Config
+	// Create empty configuration map
 	configMap := make(map[any]any)
+	// Read YAML file bytes
 	data, err := os.ReadFile(configFilePath)
+	// Check file reading
 	if err != nil {
 		return config, fmt.Errorf("error reading YAML file: %v", err)
 	}
+	// Replace environment variables in the file bytes by its value
 	dataWithEnv := os.ExpandEnv(string(data))
+	// Load YAML file bytes into configuration map
 	err = yaml.Unmarshal([]byte(dataWithEnv), &configMap)
+	// Check configuration map loading
 	if err != nil {
 		return config, fmt.Errorf("error unmarshalling YAML: %v", err)
 	}
+	// Load overload protection configuration
 	config.OverloadProtection.Enable,
 		config.OverloadProtection.RunningPeriodInSeconds,
 		config.OverloadProtection.CurrentLimit.ValueInAmps,
@@ -127,18 +173,21 @@ func LoadConfig(configFilePath string) (Config, error) {
 	if err != nil {
 		return config, err
 	}
+	// Load vehicle configuration
 	config.Vehicle.UpdateDataPeriodInSeconds,
 		config.Vehicle.DataPersistent,
 		err = loadVehicle(configMap)
 	if err != nil {
 		return config, err
 	}
+	// Load wallbox configuration
 	config.Wallbox.UpdateDataPeriodInSeconds,
 		config.Wallbox.DataPersistent,
 		err = loadWallbox(configMap)
 	if err != nil {
 		return config, err
 	}
+	// Load log configuration
 	config.Log.Level,
 		config.Log.FilePath,
 		config.Log.Rotation.PeriodInHours,
@@ -148,44 +197,37 @@ func LoadConfig(configFilePath string) (Config, error) {
 	if err != nil {
 		return config, err
 	}
+	// Load data model configuration
 	config.DataModel.Csv,
 		config.DataModel.InfluxDb,
 		err = loadDataModel(configMap)
 	if err != nil {
 		return config, err
 	}
-	config.TeleInformationClient.TIC2Websocket.IPAddress,
-		config.TeleInformationClient.TIC2Websocket.TCPPort,
-		config.TeleInformationClient.TICIdentifier.SerialNumber,
+	// Load tele information configuration
+	config.TeleInformationClient.Tic2Websocket.IpAddress,
+		config.TeleInformationClient.Tic2Websocket.TcpPort,
+		config.TeleInformationClient.TicIdentifier.SerialNumber,
 		err = loadTeleInformationClient(configMap)
 	if err != nil {
 		return config, err
 	}
-	config.EEBUS.ServerPort,
-		config.EEBUS.RemoteSKI,
-		config.EEBUS.CertificateFilePath,
-		config.EEBUS.PrivateKeyFilePath,
-		config.EEBUS.VendorCode,
-		config.EEBUS.DeviceBrand,
-		config.EEBUS.DeviceModel,
-		config.EEBUS.SerialNumber,
-		config.EEBUS.HeartbeatTimeoutInSeconds,
-		err = loadEEBUS(configMap)
+	// Load EEBUS configuration
+	config.Eebus.ServerPort,
+		config.Eebus.RemoteSki,
+		config.Eebus.CertificateFilePath,
+		config.Eebus.PrivateKeyFilePath,
+		config.Eebus.VendorCode,
+		config.Eebus.DeviceBrand,
+		config.Eebus.DeviceModel,
+		config.Eebus.SerialNumber,
+		config.Eebus.HeartbeatTimeoutInSeconds,
+		err = loadEebus(configMap)
 	if err != nil {
 		return config, err
 	}
 
 	return config, err
-}
-
-func DumpConfig(config Config) (string, error) {
-	buffer, err := yaml.Marshal((&config))
-
-	if err != nil {
-		return "", err
-	}
-
-	return string(buffer), err
 }
 
 func loadOverloadProtection(configMap map[interface{}]interface{}) (enable bool, runningPeriodInSeconds int, valueInAmps float64, lockDelayInSeconds float64, err error) {
@@ -338,20 +380,20 @@ func loadTeleInformationClient(configMap map[interface{}]interface{}) (tic2Webso
 		return "", 0, "", err
 	}
 	paramParentName = paramName
-	tic2WebsocketMap, err := loadParameterAsMap(teleInformationClientMap, paramParentName, "TIC2Websocket", true)
+	tic2WebsocketMap, err := loadParameterAsMap(teleInformationClientMap, paramParentName, "Tic2Websocket", true)
 	if err != nil {
 		return "", 0, "", err
 	}
 	paramParentName = paramParentName + "." + paramName
-	tic2WebsocketIPAddress, err = loadParameterAsString(tic2WebsocketMap, paramParentName, "IPAddress", true)
+	tic2WebsocketIPAddress, err = loadParameterAsString(tic2WebsocketMap, paramParentName, "IpAddress", true)
 	if err != nil {
 		return "", 0, "", err
 	}
-	tic2WebsocketTCPPort, err = loadParameterAsInt(tic2WebsocketMap, paramParentName, "TCPPort", true, 1, true, 65535)
+	tic2WebsocketTCPPort, err = loadParameterAsInt(tic2WebsocketMap, paramParentName, "TcpPort", true, 1, true, 65535)
 	if err != nil {
 		return tic2WebsocketIPAddress, 0, "", err
 	}
-	ticIdentifierMap, err := loadParameterAsMap(teleInformationClientMap, paramName, "TICIdentifier", true)
+	ticIdentifierMap, err := loadParameterAsMap(teleInformationClientMap, paramName, "TicIdentifier", true)
 	if err != nil {
 		return tic2WebsocketIPAddress, tic2WebsocketTCPPort, "", err
 	}
@@ -360,7 +402,7 @@ func loadTeleInformationClient(configMap map[interface{}]interface{}) (tic2Webso
 	return tic2WebsocketIPAddress, tic2WebsocketTCPPort, ticIdentifierSerialNumber, err
 }
 
-func loadEEBUS(configMap map[interface{}]interface{}) (serverPort int,
+func loadEebus(configMap map[interface{}]interface{}) (serverPort int,
 	remoteSKI string,
 	certificateFilePath string,
 	privateKeyFilePath string,
@@ -371,7 +413,7 @@ func loadEEBUS(configMap map[interface{}]interface{}) (serverPort int,
 	heartbeatTimeoutInSeconds int,
 	err error) {
 
-	paramParentName, paramName := "", "EEBUS"
+	paramParentName, paramName := "", "Eebus"
 	eebusMap, err := loadParameterAsMap(configMap, paramParentName, paramName, true)
 	if err != nil {
 		return 0, "", "", "", "", "", "", "", 0, err
@@ -381,7 +423,7 @@ func loadEEBUS(configMap map[interface{}]interface{}) (serverPort int,
 	if err != nil {
 		return 0, "", "", "", "", "", "", "", 0, err
 	}
-	remoteSKI, err = loadParameterAsSKI(eebusMap, paramParentName, "RemoteSKI")
+	remoteSKI, err = loadParameterAsSKI(eebusMap, paramParentName, "RemoteSki")
 	if err != nil {
 		return 0, "", "", "", "", "", "", "", 0, err
 	}
@@ -422,9 +464,9 @@ func loadParameterAsMap(parameterMap map[interface{}]interface{}, paramParentNam
 	if !ok {
 		if mandatory {
 			if len(paramParentName) == 0 {
-				return nil, fmt.Errorf("%s: %s not found", INVALID_PARAMETER, paramName)
+				return nil, fmt.Errorf("%s: %s not found", invalid_parameter, paramName)
 			} else {
-				return nil, fmt.Errorf("%s: %s.%s not found", INVALID_PARAMETER, paramParentName, paramName)
+				return nil, fmt.Errorf("%s: %s.%s not found", invalid_parameter, paramParentName, paramName)
 			}
 		} else {
 			return nil, nil
@@ -436,7 +478,7 @@ func loadParameterAsMap(parameterMap map[interface{}]interface{}, paramParentNam
 	}
 
 	if !ok {
-		return nil, fmt.Errorf("%s: %s.%s is not a map (%v)", INVALID_PARAMETER, paramParentName, paramName, reflect.TypeOf(parameter))
+		return nil, fmt.Errorf("%s: %s.%s is not a map (%v)", invalid_parameter, paramParentName, paramName, reflect.TypeOf(parameter))
 	}
 
 	return parameterValue, nil
@@ -450,9 +492,9 @@ func loadParameterAsExistingFilePath(parameterMap map[interface{}]interface{}, p
 	_, err = os.Stat(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return "", fmt.Errorf("%s: %s.%s file '%s' not found", INVALID_PARAMETER, paramParentName, paramName, filePath)
+			return "", fmt.Errorf("%s: %s.%s file '%s' not found", invalid_parameter, paramParentName, paramName, filePath)
 		} else {
-			return "", fmt.Errorf("%s: %s.%s file '%s' error (%s)", INVALID_PARAMETER, paramParentName, paramName, filePath, err.Error())
+			return "", fmt.Errorf("%s: %s.%s file '%s' error (%s)", invalid_parameter, paramParentName, paramName, filePath, err.Error())
 		}
 	}
 
@@ -488,7 +530,7 @@ func loadParameterAsLogLevel(parameterMap map[interface{}]interface{}, paramPare
 	}
 	logLevel, err := log.ParseLevel(level)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %s.%s unknown (%s)", INVALID_PARAMETER, paramParentName, paramName, err.Error())
+		return 0, fmt.Errorf("%s: %s.%s unknown (%s)", invalid_parameter, paramParentName, paramName, err.Error())
 	}
 
 	return logLevel, nil
@@ -499,16 +541,16 @@ func loadParameterAsSKI(parameterMap map[interface{}]interface{}, paramParentNam
 	if err != nil {
 		return "", err
 	}
-	re, err := regexp.Compile(REMOTE_SKI_REGEXP)
+	re, err := regexp.Compile(remote_ski_regexp)
 	if err != nil {
-		return "", fmt.Errorf("%s: %s.%s regex error (%s)", INVALID_PARAMETER, paramParentName, paramName, err.Error())
+		return "", fmt.Errorf("%s: %s.%s regex error (%s)", invalid_parameter, paramParentName, paramName, err.Error())
 	}
 	if len(ski) != 40 { // SHA-1 hash is 20 bytes, represented as 40 hexadecimal digits
-		return "", fmt.Errorf("%s: %s.%s must be 40 hexadecimal digits", INVALID_PARAMETER, paramParentName, paramName)
+		return "", fmt.Errorf("%s: %s.%s must be 40 hexadecimal digits", invalid_parameter, paramParentName, paramName)
 	}
 	// Check if the string matches the regex for a SHA-1 hash
 	if !re.MatchString(ski) {
-		return "", fmt.Errorf("%s: %s.%s is not a SHA-1 hash with 20 hexadecimal digits", INVALID_PARAMETER, paramParentName, paramName)
+		return "", fmt.Errorf("%s: %s.%s is not a SHA-1 hash with 20 hexadecimal digits", invalid_parameter, paramParentName, paramName)
 	}
 
 	return ski, nil
@@ -517,11 +559,11 @@ func loadParameterAsSKI(parameterMap map[interface{}]interface{}, paramParentNam
 func loadParameterAsBoolean(parameterMap map[interface{}]interface{}, paramParentName string, paramName string) (bool, error) {
 	parameter, ok := parameterMap[paramName]
 	if !ok {
-		return false, fmt.Errorf("%s: %s.%s not found", INVALID_PARAMETER, paramParentName, paramName)
+		return false, fmt.Errorf("%s: %s.%s not found", invalid_parameter, paramParentName, paramName)
 	}
 	parameterValue, ok := parameter.(bool)
 	if !ok {
-		return false, fmt.Errorf("%s: %s.%s '%v' is not a boolean", INVALID_PARAMETER, paramParentName, paramName, parameter)
+		return false, fmt.Errorf("%s: %s.%s '%v' is not a boolean", invalid_parameter, paramParentName, paramName, parameter)
 	}
 
 	return parameterValue, nil
@@ -530,15 +572,15 @@ func loadParameterAsBoolean(parameterMap map[interface{}]interface{}, paramParen
 func loadParameterAsString(parameterMap map[interface{}]interface{}, paramParentName string, paramName string, notEmpty bool) (string, error) {
 	parameter, ok := parameterMap[paramName]
 	if !ok {
-		return "", fmt.Errorf("%s: %s.%s not found", INVALID_PARAMETER, paramParentName, paramName)
+		return "", fmt.Errorf("%s: %s.%s not found", invalid_parameter, paramParentName, paramName)
 	}
 	parameterValue, ok := parameter.(string)
 	if !ok {
-		return "", fmt.Errorf("%s: %s.%s '%v' is not a string", INVALID_PARAMETER, paramParentName, paramName, parameter)
+		return "", fmt.Errorf("%s: %s.%s '%v' is not a string", invalid_parameter, paramParentName, paramName, parameter)
 	}
 	if notEmpty {
 		if len(parameterValue) == 0 {
-			return "", fmt.Errorf("%s: %s.%s cannot be empty", INVALID_PARAMETER, paramParentName, paramName)
+			return "", fmt.Errorf("%s: %s.%s cannot be empty", invalid_parameter, paramParentName, paramName)
 		}
 	}
 
@@ -548,26 +590,26 @@ func loadParameterAsString(parameterMap map[interface{}]interface{}, paramParent
 func loadParameterAsInt(parameterMap map[interface{}]interface{}, paramParentName string, paramName string, hasMin bool, minValue int, hasMax bool, maxValue int) (int, error) {
 	parameter, ok := parameterMap[paramName]
 	if !ok {
-		return 0, fmt.Errorf("%s: %s.%s not found", INVALID_PARAMETER, paramParentName, paramName)
+		return 0, fmt.Errorf("%s: %s.%s not found", invalid_parameter, paramParentName, paramName)
 	}
 	parameterValue, ok := parameter.(int)
 	if !ok {
-		return 0, fmt.Errorf("%s: %s.%s '%v' is not an integer", INVALID_PARAMETER, paramParentName, paramName, parameter)
+		return 0, fmt.Errorf("%s: %s.%s '%v' is not an integer", invalid_parameter, paramParentName, paramName, parameter)
 	}
 	if hasMin {
 		if hasMax {
 			if parameterValue < minValue || parameterValue > maxValue {
-				return 0, fmt.Errorf("%s: %s.%s  out of range [%d, %d]", INVALID_PARAMETER, paramParentName, paramName, minValue, maxValue)
+				return 0, fmt.Errorf("%s: %s.%s  out of range [%d, %d]", invalid_parameter, paramParentName, paramName, minValue, maxValue)
 			}
 		} else {
 			if parameterValue < minValue {
-				return 0, fmt.Errorf("%s: %s.%s  must be >= %d", INVALID_PARAMETER, paramParentName, paramName, minValue)
+				return 0, fmt.Errorf("%s: %s.%s  must be >= %d", invalid_parameter, paramParentName, paramName, minValue)
 			}
 		}
 	} else {
 		if hasMax {
 			if parameterValue > maxValue {
-				return 0, fmt.Errorf("%s: %s.%s  must be < %d", INVALID_PARAMETER, paramParentName, paramName, maxValue)
+				return 0, fmt.Errorf("%s: %s.%s  must be < %d", invalid_parameter, paramParentName, paramName, maxValue)
 			}
 		}
 	}
@@ -578,26 +620,26 @@ func loadParameterAsInt(parameterMap map[interface{}]interface{}, paramParentNam
 func loadParameterAsFloat(parameterMap map[interface{}]interface{}, paramParentName string, paramName string, hasMin bool, minValue float64, hasMax bool, maxValue float64) (float64, error) {
 	parameter, ok := parameterMap[paramName]
 	if !ok {
-		return 0, fmt.Errorf("%s: %s.%s not found", INVALID_PARAMETER, paramParentName, paramName)
+		return 0, fmt.Errorf("%s: %s.%s not found", invalid_parameter, paramParentName, paramName)
 	}
 	parameterValue, ok := parameter.(float64)
 	if !ok {
-		return 0, fmt.Errorf("%s: %s.%s '%v' is not a float", INVALID_PARAMETER, paramParentName, paramName, parameter)
+		return 0, fmt.Errorf("%s: %s.%s '%v' is not a float", invalid_parameter, paramParentName, paramName, parameter)
 	}
 	if hasMin {
 		if hasMax {
 			if parameterValue < minValue || parameterValue > maxValue {
-				return 0, fmt.Errorf("%s: %s.%s  out of range [%f, %f]", INVALID_PARAMETER, paramParentName, paramName, minValue, maxValue)
+				return 0, fmt.Errorf("%s: %s.%s  out of range [%f, %f]", invalid_parameter, paramParentName, paramName, minValue, maxValue)
 			}
 		} else {
 			if parameterValue < minValue {
-				return 0, fmt.Errorf("%s: %s.%s  must be >= %f", INVALID_PARAMETER, paramParentName, paramName, minValue)
+				return 0, fmt.Errorf("%s: %s.%s  must be >= %f", invalid_parameter, paramParentName, paramName, minValue)
 			}
 		}
 	} else {
 		if hasMax {
 			if parameterValue > maxValue {
-				return 0, fmt.Errorf("%s: %s.%s  must be < %f", INVALID_PARAMETER, paramParentName, paramName, maxValue)
+				return 0, fmt.Errorf("%s: %s.%s  must be < %f", invalid_parameter, paramParentName, paramName, maxValue)
 			}
 		}
 	}

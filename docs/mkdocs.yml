@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: 2025 Enedis Smarties team <dt-dsi-nexus-lab-smarties@enedis.fr>
+# SPDX-FileContributor: Jehan BOUSCH
+#
+# SPDX-License-Identifier: Apache-2.0
+
+site_name: tic4eebus
+site_url: https://enedis-oss.github.io/tic4eebus/
+site_description: Documentation tic4eebus
+
+repo_name: Enedis-OSS/tic4eebus
+repo_url: https://github.com/Enedis-OSS/tic4eebus
+# Multilingual configuration
+plugins:
+  - plantuml:
+        puml_url: http://plantuml:8080
+        puml_keyword: plantuml
+        theme:
+          enabled: true
+          light: default/light
+          dark: default/dark
+  - search
+  - i18n:
+      docs_structure: folder
+      fallback_to_default: true
+      reconfigure_material: true
+      reconfigure_search: true
+      languages:
+        - locale: fr
+          default: true
+          name: Français
+          build: true
+          nav_translations:
+            Overview: Vue d'ensemble
+            Configuration: Configuration
+            Architecture: Architecture logicielle
+            Model : Modèle de données
+            Code: Code source
+        - locale: en
+          name: English
+          build: true
+          nav_translations:
+            Overview: Overview
+            Configuration: Configuration
+            Architecture: Software Architecture
+            Model : Data Model
+            Code: Source Code
+
+# Site navigation
+nav:
+  - Overview: index.md
+  - Configuration: configuration.md
+  - Architecture: architecture.md
+  - Model: data_model.md
+  - Code: source_code.md
+
+theme:
+    name: material
+    language: fr
+    logo: var/images/logo.png
+    favicon: var/images/favicon.ico
+    font:
+      text: Ubuntu
+    features:
+          - navigation.sections
+          - navigation.expand
+          - navigation.indexes
+          - toc.integrate
